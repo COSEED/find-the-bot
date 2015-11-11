@@ -23,7 +23,7 @@ class Test(db.Model):
 class TestSelection(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     test_id = db.Column(db.Integer, db.ForeignKey('test.id'))
-    tuser_id = db.Column(db.Integer, db.ForeignKey('tuser.id'))
+    tuser_id = db.Column(db.BigInteger, db.ForeignKey('tuser.id'))
     order = db.Column(db.Integer)
 
     tuser = db.relationship('Tuser', lazy='joined')
@@ -31,13 +31,13 @@ class TestSelection(db.Model):
 class TestGuess(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     test_id = db.Column(db.Integer, db.ForeignKey('test.id'))
-    tuser_id = db.Column(db.Integer, db.ForeignKey('tuser.id'))
+    tuser_id = db.Column(db.BigInteger, db.ForeignKey('tuser.id'))
     guess_is_bot = db.Column(db.Boolean)
 
     tuser = db.relationship('Tuser', lazy='joined')
 
 class Tuser(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.BigInteger, primary_key=True)
     timestamp = db.Column(db.Integer)
     user_id = db.Column(db.String(32))
     screen_name = db.Column(db.String(32))
@@ -61,8 +61,8 @@ class Tuser(db.Model):
         return '<TUser observation of @%s [user id=%d] at %d>' % (self.screen_name, int(self.user_id), self.timestamp)
 
 class Tweet(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    tweet_id = db.Column(db.Integer)
+    id = db.Column(db.BigInteger, primary_key=True)
+    tweet_id = db.Column(db.BigInteger)
     user_id = db.Column(db.String(32))
     text = db.Column(db.Text)
     timestamp = db.Column(db.Integer)

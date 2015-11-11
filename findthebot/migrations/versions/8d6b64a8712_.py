@@ -1,13 +1,13 @@
 """empty message
 
-Revision ID: 431defc6f54f
+Revision ID: 8d6b64a8712
 Revises: None
-Create Date: 2015-11-11 02:15:16.311663
+Create Date: 2015-11-11 02:25:57.689247
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '431defc6f54f'
+revision = '8d6b64a8712'
 down_revision = None
 
 from alembic import op
@@ -30,7 +30,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('tuser',
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.BigInteger(), nullable=False),
     sa.Column('timestamp', sa.Integer(), nullable=True),
     sa.Column('user_id', sa.String(length=32), nullable=True),
     sa.Column('screen_name', sa.String(length=32), nullable=True),
@@ -49,8 +49,8 @@ def upgrade():
     )
     op.create_index('tuser_by_id_timestamp', 'tuser', ['user_id', 'timestamp'], unique=False)
     op.create_table('tweet',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('tweet_id', sa.Integer(), nullable=True),
+    sa.Column('id', sa.BigInteger(), nullable=False),
+    sa.Column('tweet_id', sa.BigInteger(), nullable=True),
     sa.Column('user_id', sa.String(length=32), nullable=True),
     sa.Column('text', sa.Text(), nullable=True),
     sa.Column('timestamp', sa.Integer(), nullable=True),
@@ -62,7 +62,7 @@ def upgrade():
     op.create_table('test_guess',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('test_id', sa.Integer(), nullable=True),
-    sa.Column('tuser_id', sa.Integer(), nullable=True),
+    sa.Column('tuser_id', sa.BigInteger(), nullable=True),
     sa.Column('guess_is_bot', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['test_id'], ['test.id'], ),
     sa.ForeignKeyConstraint(['tuser_id'], ['tuser.id'], ),
@@ -71,7 +71,7 @@ def upgrade():
     op.create_table('test_selection',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('test_id', sa.Integer(), nullable=True),
-    sa.Column('tuser_id', sa.Integer(), nullable=True),
+    sa.Column('tuser_id', sa.BigInteger(), nullable=True),
     sa.Column('order', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['test_id'], ['test.id'], ),
     sa.ForeignKeyConstraint(['tuser_id'], ['tuser.id'], ),
