@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+    <body>
+        <p>Showing profile {{ guess_id+1 }} of {{ test.selections | length }}.</p>
+
+        <div id="top">
+            <p class="icon"><img src="{{ tuser.profile_image_url }}" /></p>
+            <p class="name">{{ tuser.full_name }}</p>
+            <p class="screen-name">@{{ tuser.screen_name }}</p>
+
+            <dl>
+                <dt>TWEETS</dt>
+                <dd>{{ tuser.total_tweets }}</dd>
+
+                <dt>FOLLOWING</dt>
+                <dd>{{ tuser.following }}</dd>
+
+                <dt>FOLLOWERS</dt>
+                <dd>{{ tuser.followers }}</dd>
+
+            </dl>
+        </div>
+
+        <div id="profile">
+            <p class="name">{{ tuser.full_name }}</p>
+            <p class="screen-name">@{{ tuser.screen_name }}</p>
+            <p class="bio">{{ tuser.bio }}</p>
+            {% if tuser.website %}
+            <p class="website"><a href="#">{{ tuser.website }}</a></p>
+            {% endif %}
+            <p class="location">Location: {{ tuser.location }}</p>
+        </div>
+
+        <div id="findthebot">
+            <form class="bot" method="post" action="/test/{{ test.id }}/guess">
+                <input type="hidden" name="tuser_id" value="{{ tuser.id }}" />
+                <input type="hidden" name="botornot" value="1" />
+                <input type="submit" value="Bot" />
+            </form>
+
+            <form class="human" method="post" action="/test/{{ test.id }}/guess">
+                <input type="hidden" name="tuser_id" value="{{ tuser.id }}" />
+                <input type="hidden" name="botornot" value="0" />
+                <input type="submit" value="Human" />
+            </form>
+        </div>
+
+        <div id="tweets">
+            <h1>Tweets</h1>
+
+            {% for tweet in tweets %}
+            <div class="tweet-card">
+                <p class="byline">
+                    <span class="icon"><img src="{{ tuser.profile_image_url }}" /></span>
+                    <span class="name">{{ tuser.full_name }}</span>
+                    <span class="screen-name">@{{ tuser.screen_name }}</span>
+                    <span class="timestamp">{{ tweet.timestamp }}</span>
+                </p>
+                <p>{{ tweet.text }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </body>
+</html>

@@ -1,8 +1,7 @@
 import os
 
-from flask import Flask
+from flask import Flask, redirect, render_template, request
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask import redirect
 
 app = Flask(__name__)
 
@@ -56,8 +55,34 @@ class Tuser(db.Model):
 
     db.Index('tuser_by_id_timestamp', user_id, timestamp)
 
+    tweets = db.relationship('Tweet', primaryjoin="and_(foreign(Tweet.user_id)==Tuser.user_id)")
+
     def __repr__(self):
         return '<TUser observation of @%s [user id=%d] at %d>' % (self.screen_name, int(self.user_id), self.timestamp)
+
+class Tweet(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tweet_id = db.Column(db.Integer)
+    user_id = db.Column(db.String(32))
+    text = db.Column(db.Text)
+    timestamp = db.Column(db.Integer)
+    interesting = db.Column(db.Boolean)
+
+    db.Index('tweet_by_tweet_id', tweet_id)
+    db.Index('tweet_by_user_id_by_time', user_id, timestamp)
+
+class TeamBot(db.Model):
+    __tablename__ = "team_bot"
+
+    team_id = db.Column(db.Integer)
+    twitter_id = db.Column(db.String(32), db.ForeignKey('tuser.user_id'))
+    screen_name = db.Column(db.String(32))
+    #type = db.Column(db.Integer)
+    kill_date = db.Column(db.Integer)
+
+    db.PrimaryKeyConstraint(team_id, twitter_id)
+
+    db.Index('by_tuser_id', twitter_id)
 
 randoms = [
     5588759, # Fenvirantiviral
@@ -67,9 +92,36 @@ randoms = [
     5582960 # Random 3
 ]
 
+def find_results(test):
+    data = {}
+    data['correct'] = 0
+    data['incorrect'] = 0
+    data['test'] = test
+
+    guesses = test.guesses
+    selections = test.selections
+
+    bots = TeamBot.query.all()
+
+    for guess in guesses:
+        tuser = guess.tuser
+
+        correct = False
+
+        for bot in bots:
+            if bot.twitter_id == tuser.user_id:
+                correct = True
+
+        if correct:
+            data['correct'] += 1
+        else:
+            data['incorrect'] += 1
+
+    return data
+
 @app.route('/')
 def index():
-    return "Index"
+    return render_template("index.html")
 
 @app.route('/test/new')
 def test_new():
@@ -89,16 +141,37 @@ def test_new():
 def test_done(test_id):
     test = Test.query.filter(Test.id == test_id).first()
 
-    return "Showing %s" % (str(test))
+    results = find_results(test)
+
+    return render_template("test_results.html", results=results)
+
+@app.route('/test/<test_id>/guess', methods=['POST'])
+def test_makeguess(test_id):
+    user_id = request.form["tuser_id"]
+    botornot = request.form["botornot"]
+
+    guess = TestGuess(test_id=test_id, tuser_id=int(user_id), guess_is_bot=bool(botornot))
+    db.session.add(guess)
+    db.session.commit()
+
+    test = Test.query.filter(Test.id == test_id).first()
+
+    if len(test.guesses) >= len(test.selections):
+        return redirect("/test/%s/complete" % (test_id))
+    else:
+        return redirect("/test/%s/%d" % (test_id, len(test.guesses)))
 
 @app.route('/test/<test_id>/<guess_id>')
-def test_makeguess(test_id, guess_id):
+def test_showguess(test_id, guess_id):
     test = Test.query.filter(Test.id == test_id).first()
 
     if int(guess_id) >= len(test.selections):
         return redirect('/test/%s/complete' % (test_id))
 
-    return "Showing profile for %d/%d of %s" % (int(guess_id)+1, len(test.selections), test.selections[int(guess_id)].tuser.screen_name)
+    tuser = tuser=test.selections[int(guess_id)].tuser
+    tweets = tuser.tweets
+
+    return render_template("make_guess.html", guess_id=int(guess_id), test=test, tuser=tuser, tweets=tweets)
 
 if __name__ == "__main__":
     app.run(debug=debug, host='0.0.0.0', port=int(os.getenv("PORT")))
