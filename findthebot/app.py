@@ -75,7 +75,7 @@ class TeamBot(db.Model):
     __tablename__ = "team_bot"
 
     team_id = db.Column(db.Integer)
-    twitter_id = db.Column(db.String(32), db.ForeignKey('tuser.user_id'))
+    twitter_id = db.Column(db.String(32))
     screen_name = db.Column(db.String(32))
     type = db.Column(db.Integer)
     kill_date = db.Column(db.Integer)
