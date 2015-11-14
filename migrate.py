@@ -1,4 +1,4 @@
-from app import app, db
+from findthebot.app import app, db
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 
