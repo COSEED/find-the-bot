@@ -11,4 +11,6 @@ before_script:
     - psql -U postgres travis_ci_test < tests/fixture/test-data.sql
 script: 
     - py.test
-    - foreman start web
+    - foreman start web &
+    - sleep 1
+    - curl http://localhost:$PORT
