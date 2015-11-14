@@ -3,10 +3,14 @@ python: 2.7
 services:
     - postgresql
 env: 
-    - DATABASE_URL=postgresql+psycopg2://travis@localhost/travis_ci_test
+    - DATABASE_URL=postgresql+psycopg2://travis@localhost/travis_ci_test PORT=5000
 before_script:
+    - gem install foreman
     - psql -c 'create database travis_ci_test;' -U postgres
     - python migrate.py db upgrade
     - psql -U postgres travis_ci_test < tests/fixture/test-data.sql
 script: 
     - py.test
+    - foreman start web &
+    - sleep 1
+    - curl http://localhost:$PORT
