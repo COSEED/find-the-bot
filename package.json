@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "prepublish": "gulp scripts && gulp stylesheets"
+    "postinstall": "gulp scripts && gulp stylesheets"
   },
-  "devDependencies": {
+  "dependencies": {
     "bootstrap": "^3.3.5",
     "del": "^2.1.0",
     "gulp": "^3.9.0",
