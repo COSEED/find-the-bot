@@ -14,7 +14,7 @@ var paths = {
 // A gulpfile is just another node program and you can use all packages available on npm 
 gulp.task('clean', function(cb) {
   // You can use multiple globbing patterns as you would with `gulp.src` 
-  return del(['findthebot/static/*'], cb);
+  return del(['findthebot/static/js/*.js', 'findthebot/static/css/*.css'], cb);
 });
  
 gulp.task('scripts', ['clean'], function() {

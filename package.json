@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "postinstall": "gulp scripts && gulp stylesheets"
+  },
   "devDependencies": {
     "bootstrap": "^3.3.5",
     "del": "^2.1.0",
