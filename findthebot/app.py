@@ -171,7 +171,9 @@ def test_showguess(test_id, guess_id):
     tuser = tuser=test.selections[int(guess_id)].tuser
     tweets = tuser.tweets
 
-    return render_template("make_guess.html", guess_id=int(guess_id), test=test, tuser=tuser, tweets=tweets)
+    tuser_is_bot = len(TeamBot.query.filter(TeamBot.twitter_id == tuser.user_id).all()) > 0
+
+    return render_template("make_guess.html", guess_id=int(guess_id), test=test, tuser=tuser, tweets=tweets, is_bot=tuser_is_bot)
 
 if __name__ == "__main__":
     app.run(debug=debug, host='0.0.0.0', port=int(os.getenv("PORT")))

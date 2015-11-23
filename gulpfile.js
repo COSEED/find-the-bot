@@ -3,7 +3,11 @@ var concat = require('gulp-concat');
 var del = require('del');
  
 var paths = {
-  scripts: ['node_modules/bootstrap/dist/js/bootstrap.js'],
+  scripts: [
+      'node_modules/jquery/dist/jquery.js',
+      'node_modules/bootstrap/dist/js/bootstrap.js',
+      'html/js/**/*.js'
+  ],
   stylesheets: [
       'node_modules/bootstrap/dist/css/bootstrap.css',
       'html/css/**/*.css'

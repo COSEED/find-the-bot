@@ -19,12 +19,12 @@
     margin: 0;
 }
 
-.header input[type="submit"] {
+.header input[type="submit"].btn-default {
     color: white;
     background: black;
 }
 
-.header input[type="submit"]:active {
+.header input[type="submit"].btn-default:active {
     color: white;
     background: #888;
 }
