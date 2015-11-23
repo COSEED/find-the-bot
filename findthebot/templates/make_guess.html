@@ -1,64 +1,81 @@
 <!doctype html>
-<html>
+<html lang="en">
+    <head>
+        <link type="text/css" rel="stylesheet" href="/static/css/all.css" />
+        <script type="text/javascript" src="/static/js/all.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+
     <body>
-        <p>Showing profile {{ guess_id+1 }} of {{ test.selections | length }}.</p>
+        <div class="container">
 
-        <div id="top">
-            <p class="icon"><img src="{{ tuser.profile_image_url }}" /></p>
-            <p class="name">{{ tuser.full_name }}</p>
-            <p class="screen-name">@{{ tuser.screen_name }}</p>
+            <div class="row header">
+                <div class="col-xs-2">
+                    <p class="x-of-y">{{ guess_id+1 }} of {{ test.selections | length }}</p>
+                </div>
 
-            <dl>
-                <dt>TWEETS</dt>
-                <dd>{{ tuser.total_tweets }}</dd>
+                <div class="col-xs-5">
+                    <form class="guess-form bot" method="post" action="/test/{{ test.id }}/guess">
+                        <input type="hidden" name="tuser_id" value="{{ tuser.id }}" />
+                        <input type="hidden" name="botornot" value="1" />
+                        <input class="btn btn-default btn-lg" type="submit" value="Bot" />
+                    </form>
+                </div>
 
-                <dt>FOLLOWING</dt>
-                <dd>{{ tuser.following }}</dd>
+                <div class="col-xs-5">
+                    <form class="guess-form human" method="post" action="/test/{{ test.id }}/guess">
+                        <input type="hidden" name="tuser_id" value="{{ tuser.id }}" />
+                        <input type="hidden" name="botornot" value="0" />
+                        <input class="btn btn-default btn-lg" type="submit" value="Human" />
+                    </form>
+                </div>
 
-                <dt>FOLLOWERS</dt>
-                <dd>{{ tuser.followers }}</dd>
+            </div> <!-- .row -->
 
-            </dl>
-        </div>
+            <div class="profile row">
+                <div class="col-md-3">
+                    <p class="icon"><img src="{{ tuser.profile_image_url }}" /></p>
+                </div>
+                <div class="col-md-9">
+                    <p class="name">{{ tuser.full_name }}</p>
+                    <p class="screen-name">@{{ tuser.screen_name }}</p>
+                    <p class="bio">{{ tuser.bio }}</p>
 
-        <div id="profile">
-            <p class="name">{{ tuser.full_name }}</p>
-            <p class="screen-name">@{{ tuser.screen_name }}</p>
-            <p class="bio">{{ tuser.bio }}</p>
-            {% if tuser.website %}
-            <p class="website"><a href="#">{{ tuser.website }}</a></p>
-            {% endif %}
-            <p class="location">Location: {{ tuser.location }}</p>
-        </div>
+                    {% if tuser.website %}
+                    <p class="website"><a href="#">{{ tuser.website }}</a></p>
+                    {% endif %}
+                    <p class="location">{{ tuser.location }}</p>
 
-        <div id="findthebot">
-            <form class="bot" method="post" action="/test/{{ test.id }}/guess">
-                <input type="hidden" name="tuser_id" value="{{ tuser.id }}" />
-                <input type="hidden" name="botornot" value="1" />
-                <input type="submit" value="Bot" />
-            </form>
+                    <div class="row">
+                        <dl>
+                            <div class="col-md-4">
+                                <dt>TWEETS</dt>
+                                <dd>{{ tuser.total_tweets }}</dd>
+                            </div>
 
-            <form class="human" method="post" action="/test/{{ test.id }}/guess">
-                <input type="hidden" name="tuser_id" value="{{ tuser.id }}" />
-                <input type="hidden" name="botornot" value="0" />
-                <input type="submit" value="Human" />
-            </form>
-        </div>
+                            <div class="col-md-4">
+                                <dt>FOLLOWING</dt>
+                                <dd>{{ tuser.following }}</dd>
+                            </div>
 
-        <div id="tweets">
-            <h1>Tweets</h1>
+                            <div class="col-md-4">
+                                <dt>FOLLOWERS</dt>
+                                <dd>{{ tuser.followers }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
 
             {% for tweet in tweets %}
-            <div class="tweet-card">
-                <p class="byline">
-                    <span class="icon"><img src="{{ tuser.profile_image_url }}" /></span>
-                    <span class="name">{{ tuser.full_name }}</span>
-                    <span class="screen-name">@{{ tuser.screen_name }}</span>
-                    <span class="timestamp">{{ tweet.timestamp }}</span>
-                </p>
-                <p>{{ tweet.text }}</p>
+            <div class="row tweet-card">
+                <div class="col-xs-12">
+                    <p class="timestamp">{{ tweet.timestamp }}</span>
+                    <p>{{ tweet.text }}</p>
+                </div>
             </div>
             {% endfor %}
-        </div>
+
+        </div> <!-- .container -->
     </body>
 </html>

@@ -1,0 +1,45 @@
+.tweet-card {
+    border: 1px solid #888;
+    border-width: 1px 1px 0 1px;
+}
+
+.tweet-card:last-child {
+    border-width: 1px;
+}
+
+.header {
+    background-color: #bbb;
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+    margin: 0;
+}
+
+.header input[type="submit"] {
+    color: white;
+    background: black;
+}
+
+.header input[type="submit"]:active {
+    color: white;
+    background: #888;
+}
+
+.profile {
+    margin-top: 100px;
+    margin-bottom: 30px;
+}
+
+.icon {
+    text-align: center;
+}
+
+.x-of-y {
+    line-height: 46px;
+    vertical-align: middle;
+    margin: 0;
+}

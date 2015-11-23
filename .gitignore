@@ -1,3 +1,4 @@
 *.pyc
 *.sw[o-p]
 .cache
+node_modules
