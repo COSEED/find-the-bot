@@ -92,7 +92,10 @@ randoms = [
     5582960 # Random 3
 ]
 
-def find_results(test):
+def find_results(bots, test):
+    '''Given a set of bots and a test which is a set of selections (that may or may not be bots) and a set of guesses, 
+    compute the number of correct and incorrect guesses.'''
+
     data = {}
     data['correct'] = 0
     data['incorrect'] = 0
@@ -101,16 +104,10 @@ def find_results(test):
     guesses = test.guesses
     selections = test.selections
 
-    bots = TeamBot.query.all()
-
     for guess in guesses:
         tuser = guess.tuser
 
-        correct = False
-
-        for bot in bots:
-            if bot.twitter_id == tuser.user_id:
-                correct = True
+        correct = (guess.guess_is_bot and tuser.user_id in bots) or ((guess.guess_is_bot is False) and tuser.user_id not in bots)
 
         if correct:
             data['correct'] += 1
@@ -140,17 +137,19 @@ def test_new():
 @app.route('/test/<test_id>/complete')
 def test_done(test_id):
     test = Test.query.filter(Test.id == test_id).first()
+    bots = TeamBot.query.all()
+    bots_userids = set([str(bot.twitter_id) for bot in bots])
 
-    results = find_results(test)
+    results = find_results(bots_userids, test)
 
     return render_template("test_results.html", results=results)
 
 @app.route('/test/<test_id>/guess', methods=['POST'])
 def test_makeguess(test_id):
     user_id = request.form["tuser_id"]
-    botornot = request.form["botornot"]
+    guess_is_bot = (request.form["guess_is_bot"] == "1")
 
-    guess = TestGuess(test_id=test_id, tuser_id=int(user_id), guess_is_bot=bool(botornot))
+    guess = TestGuess(test_id=test_id, tuser_id=int(user_id), guess_is_bot=guess_is_bot)
     db.session.add(guess)
     db.session.commit()
 

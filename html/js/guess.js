@@ -1,7 +1,7 @@
-$('.guess-correct .btn').click(function() {
-    $('.guess-correct .btn').removeClass('btn-default').addClass('btn-success');
+$('.page-guess .guess-correct .btn').click(function() {
+    $(this).removeClass('btn-default').addClass('btn-success');
 });
 
-$('.guess-incorrect .btn').click(function() {
-    $('.guess-incorrect .btn').removeClass('btn-default').addClass('btn-danger');
+$('.page-guess .guess-incorrect .btn').click(function() {
+    $(this).removeClass('btn-default').addClass('btn-danger');
 });

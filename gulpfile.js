@@ -14,14 +14,18 @@ var paths = {
   ]
 };
  
-// Not all tasks need to use streams 
-// A gulpfile is just another node program and you can use all packages available on npm 
-gulp.task('clean', function(cb) {
-  // You can use multiple globbing patterns as you would with `gulp.src` 
-  return del(['findthebot/static/js/*.js', 'findthebot/static/css/*.css'], cb);
+gulp.task('clean-stylesheets', function(cb) {
+  return del(['findthebot/static/css/*.css'], cb);
 });
- 
-gulp.task('scripts', ['clean'], function() {
+
+gulp.task('clean-scripts', function(cb) {
+  return del(['findthebot/static/js/*.js'], cb);
+});
+
+gulp.task('clean', ['clean-stylesheets', 'clean-scripts']);
+
+
+gulp.task('scripts', ['clean-scripts'], function() {
   // Minify and copy all JavaScript (except vendor scripts) 
   // with sourcemaps all the way down 
   return gulp.src(paths.scripts)
@@ -29,7 +33,7 @@ gulp.task('scripts', ['clean'], function() {
     .pipe(gulp.dest('findthebot/static/js/'));
 });
 
-gulp.task('stylesheets', ['clean'], function() {
+gulp.task('stylesheets', ['clean-stylesheets'], function() {
   // Minify and copy all JavaScript (except vendor scripts) 
   // with sourcemaps all the way down 
   return gulp.src(paths.stylesheets)
@@ -43,4 +47,4 @@ gulp.task('watch', function() {
 });
  
 // The default task (called when you run `gulp` from cli) 
-gulp.task('default', ['watch', 'scripts', 'stylesheets']);
+gulp.task('default', ['clean', 'watch', 'scripts', 'stylesheets']);

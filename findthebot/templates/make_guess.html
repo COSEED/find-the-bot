@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
 
-    <body>
+    <body class="page-guess">
         <div class="container">
             <div class="row header">
                 <div class="col-xs-2">
@@ -15,7 +15,7 @@
                 <div class="col-xs-5">
                     <form class="guess-form bot guess-{% if is_bot == False %}in{% endif %}correct" method="post" action="/test/{{ test.id }}/guess">
                         <input type="hidden" name="tuser_id" value="{{ tuser.id }}" />
-                        <input type="hidden" name="botornot" value="1" />
+                        <input type="hidden" name="guess_is_bot" value="1" />
                         <input class="btn btn-default btn-lg" type="submit" value="Bot" />
                     </form>
                 </div>
@@ -23,7 +23,7 @@
                 <div class="col-xs-5">
                     <form class="guess-form human guess-{% if is_bot %}in{% endif%}correct" method="post" action="/test/{{ test.id }}/guess">
                         <input type="hidden" name="tuser_id" value="{{ tuser.id }}" />
-                        <input type="hidden" name="botornot" value="0" />
+                        <input type="hidden" name="guess_is_bot" value="0" />
                         <input class="btn btn-default btn-lg" type="submit" value="Human" />
                     </form>
                 </div>
