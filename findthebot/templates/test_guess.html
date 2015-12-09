@@ -3,6 +3,7 @@
     <head>
         <link type="text/css" rel="stylesheet" href="/static/css/all.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>COSEED Quiz - {{ guess_id + 1}} of {{ test.selections | length }}</title>
     </head>
 
     <body class="page-guess">
@@ -32,7 +33,7 @@
 
             <div class="row profile">
                 <div class="col-md-3">
-                    <p class="icon"><img src="{{ tuser.profile_image_url }}" /></p>
+                    <p class="icon"><img src="{{ tuser.get_profile_url_fullsize() }}" /></p>
                 </div>
                 <div class="col-md-9">
                     <p class="name">{{ tuser.full_name }}</p>

@@ -14,6 +14,43 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 
 db = SQLAlchemy(app)
 
+DIFFICULTY_EASY = 'easy'
+DIFFICULTY_MEDIUM = 'medium'
+DIFFICULTY_HARD = 'hard'
+
+# 2/5 bots
+USERS_HARD = [
+    5588759, # Fenvirantiviral
+    5582774, # Random 1
+    5586448, # SarahAndFam
+    5586871, # Random 2
+    5582960  # Random 3
+]
+
+# 4/5 bots
+USERS_EASY = [
+    5584555, # sonny_mkii (bot)
+    4823361, # Daryl_V1 (bot)
+    4817289, # HectorBigs (bot)
+    4822353, # robo_ash (bot)
+    5582689  # CoryBooker, U.S. Senator from New Jersey (Not)
+]
+
+# 3/5 bots
+USERS_MEDIUM = [
+    5590373, # cleanlivingmama (bot)
+    5589464, # TannersDad (Not)
+    5579275, # nursekayci (bot)
+    5585284, # Peter_Pete_Pete (bot)
+    5589488, # yokoono (Not)
+]
+
+USERS = {
+    DIFFICULTY_EASY: USERS_EASY,
+    DIFFICULTY_MEDIUM: USERS_MEDIUM,
+    DIFFICULTY_HARD: USERS_HARD
+}
+
 class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
@@ -60,6 +97,10 @@ class Tuser(db.Model):
     def __repr__(self):
         return '<TUser observation of @%s [user id=%d] at %d>' % (self.screen_name, int(self.user_id), self.timestamp)
 
+    # I captured the small version, so strip out the _normal suffix
+    def get_profile_url_fullsize(self):
+        return self.profile_image_url.replace("_normal", "")
+
 class Tweet(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     tweet_id = db.Column(db.BigInteger)
@@ -84,13 +125,6 @@ class TeamBot(db.Model):
 
     db.Index('by_tuser_id', twitter_id)
 
-randoms = [
-    5588759, # Fenvirantiviral
-    5582774, # Random 1
-    5586448, # SarahAndFam
-    5586871, # Rnadom 2
-    5582960 # Random 3
-]
 
 def find_results(bots, test):
     '''Given a set of bots and a test which is a set of selections (that may or may not be bots) and a set of guesses, 
@@ -120,13 +154,19 @@ def find_results(bots, test):
 def index():
     return render_template("index.html")
 
-@app.route('/test/new')
+@app.route('/test/difficulty')
+def test_choose_difficulty():
+    return render_template("test_choose_difficulty.html")
+
+@app.route('/test/new', methods=['POST'])
 def test_new():
     test = Test()
     db.session.add(test)
     db.session.commit()
 
-    for uid in randoms:
+    difficulty = request.form["difficulty"]
+
+    for uid in USERS[difficulty]:
         selection = TestSelection(test_id=test.id, tuser_id=uid)
         db.session.add(selection)
 
@@ -172,7 +212,7 @@ def test_showguess(test_id, guess_id):
 
     tuser_is_bot = len(TeamBot.query.filter(TeamBot.twitter_id == tuser.user_id).all()) > 0
 
-    return render_template("make_guess.html", guess_id=int(guess_id), test=test, tuser=tuser, tweets=tweets, is_bot=tuser_is_bot)
+    return render_template("test_guess.html", guess_id=int(guess_id), test=test, tuser=tuser, tweets=tweets, is_bot=tuser_is_bot)
 
 if __name__ == "__main__":
     app.run(debug=debug, host='0.0.0.0', port=int(os.getenv("PORT")))

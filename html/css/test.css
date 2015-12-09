@@ -38,6 +38,11 @@
     text-align: center;
 }
 
+.icon img {
+    max-width: 200px;
+    max-height: 200px;
+}
+
 .x-of-y {
     line-height: 46px;
     vertical-align: middle;
