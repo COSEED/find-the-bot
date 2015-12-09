@@ -5,6 +5,8 @@
     padding: 0.5em;
 }
 
-.header-inner {
+a.header-inner {
     height: 4em;
+    width: calc(825/250*4em);
+    display: block;
 }
