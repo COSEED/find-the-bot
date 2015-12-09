@@ -1,0 +1,43 @@
+.coseed-darkblue-color {
+    color: #150BB7;
+}
+
+.coseed-darkblue-background {
+    background-color: #150BB7;
+}
+
+.coseed-blue-color {
+    color: #0E70DB;
+}
+
+.coseed-blue-background {
+    background-color: #0E70DB;
+}
+
+.coseed-cyan-color {
+    color: #21EEDC;
+}
+
+.coseed-cyan-background {
+    background-color: #21EEDC;
+}
+
+.coseed-lightcyan-color {
+    color: #A0FFF0;
+}
+
+.coseed-lightcyan-background {
+    background-color: #A0FFF0;
+}
+
+.coseed-logo-dark {
+    background: url(/static/img/coseed-logo-dark.svg) no-repeat;
+}
+
+.coseed-logo-light {
+    background: url(/static/img/coseed-logo-light.svg) no-repeat;
+}
+
+.coseed-logo-icon {
+    background: url(/static/img/coseed-logo-icon.svg) no-repeat;
+}

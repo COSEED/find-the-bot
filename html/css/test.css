@@ -7,24 +7,31 @@
     border-width: 1px;
 }
 
-.header {
+.guess-header {
     background-color: #bbb;
     text-align: center;
     padding: 10px;
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
     z-index: 1;
     margin: 0;
 }
+.guess-header.affix-top {
+    position: absolute;
+    left: 0;
+}
 
-.header input[type="submit"].btn-default {
+.guess-header.affix {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.guess-header input[type="submit"].btn-default {
     color: white;
     background: black;
 }
 
-.header input[type="submit"].btn-default:active {
+.guess-header input[type="submit"].btn-default:active {
     color: white;
     background: #888;
 }
