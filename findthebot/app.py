@@ -1,4 +1,5 @@
 import os
+import time
 
 from flask import Flask, redirect, render_template, request
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -111,6 +112,9 @@ class Tweet(db.Model):
 
     db.Index('tweet_by_tweet_id', tweet_id)
     db.Index('tweet_by_user_id_by_time', user_id, timestamp)
+
+    def get_friendly_datetime(self):
+        return time.strftime("%d %b, %I:%M%p", time.gmtime(self.timestamp))
 
 class TeamBot(db.Model):
     __tablename__ = "team_bot"
