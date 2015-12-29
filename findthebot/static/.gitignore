@@ -1,2 +1,7 @@
 *.css
 *.js
+*.woff
+*.woff2
+*.eot
+*.svg
+*.ttf

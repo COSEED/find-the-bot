@@ -9,26 +9,28 @@
     <body class="page-guess">
         {% include "fragments/header.html" %}
 
+        <div class="hidden lessons-modal lessons-modal-global"></div>
+
         <div class="container">
             <div class="row guess-header">
+                <div class="hidden lessons-modal lessons-modal-header"></div>
+
                 <div class="col-xs-2">
                     <p class="x-of-y">{{ guess_id+1 }} of {{ test.selections | length }}</p>
                 </div>
 
                 <div class="col-xs-5">
-                    <form class="guess-form bot guess-{% if is_bot == False %}in{% endif %}correct" method="post" action="/test/{{ test.id }}/guess">
-                        <input type="hidden" name="tuser_id" value="{{ tuser.id }}" />
-                        <input type="hidden" name="guess_is_bot" value="1" />
-                        <input class="btn btn-default btn-lg" type="submit" value="Bot" />
-                    </form>
+                    <div class="guess-form bot guess-{% if is_bot == False %}in{% endif %}correct" data-bot="1" data-tuser-id="{{ tuser.id }}" data-test-id="{{ test.id }}">
+                        <span class="glyphicon glyphicon-{% if is_bot == False %}remove{% else %}ok{% endif %}" aria-hidden="true"></span>
+                        <button class="btn btn-default btn-lg">Bot</button>
+                    </div>
                 </div>
 
                 <div class="col-xs-5">
-                    <form class="guess-form human guess-{% if is_bot %}in{% endif%}correct" method="post" action="/test/{{ test.id }}/guess">
-                        <input type="hidden" name="tuser_id" value="{{ tuser.id }}" />
-                        <input type="hidden" name="guess_is_bot" value="0" />
-                        <input class="btn btn-default btn-lg" type="submit" value="Human" />
-                    </form>
+                    <div class="guess-form human guess-{% if is_bot %}in{% endif%}correct" data-bot="0" data-tuser-id="{{ tuser.id }}" data-test-id="{{ test.id }}">
+                        <span class="glyphicon glyphicon-{% if is_bot == False %}ok{% else %}remove{% endif %}" aria-hidden="true"></span>
+                        <button class="btn btn-default btn-lg">Human</button>
+                    </div>
                 </div>
 
             </div> <!-- .row -->
@@ -38,46 +40,95 @@
                     <p class="icon"><img src="{{ tuser.get_profile_url_fullsize() }}" /></p>
                 </div>
                 <div class="col-md-9">
-                    <p class="name">{{ tuser.full_name }}</p>
-                    <p class="screen-name">@{{ tuser.screen_name }}</p>
+                    <h3>{{ tuser.full_name }}</h3>
+                    <h4>@{{ tuser.screen_name }}</h4>
+
                     <p class="bio">{{ tuser.bio }}</p>
 
+                    <p>
                     {% if tuser.website %}
-                    <p class="website"><a href="#">{{ tuser.website }}</a></p>
+                    <span class="glyphicon glyphicon-link" aria-hidden="true"></span><a href="{{ tuser.website }}">{{ tuser.website }}</a>
+                    <br />
                     {% endif %}
-                    <p class="location">{{ tuser.location }}</p>
+
+                    {% if tuser.location %}
+                    <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+                    {{ tuser.location }}
+                    {% endif %}
+                    </p>
 
                     <div class="row">
-                        <dl>
-                            <div class="col-md-4">
-                                <dt>TWEETS</dt>
-                                <dd>{{ tuser.total_tweets }}</dd>
+                        <div class="col-md-4">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">
+                                        Tweets
+                                    </h3>
+                                </div>
+                                <div class="panel-body">
+                                    {{ tuser.total_tweets }}
+                                </div>
                             </div>
-
-                            <div class="col-md-4">
-                                <dt>FOLLOWING</dt>
-                                <dd>{{ tuser.following }}</dd>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">
+                                        Following
+                                    </h3>
+                                </div>
+                                <div class="panel-body">
+                                    {{ tuser.following }}
+                                </div>
                             </div>
-
-                            <div class="col-md-4">
-                                <dt>FOLLOWERS</dt>
-                                <dd>{{ tuser.followers }}</dd>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">
+                                        Followers
+                                    </h3>
+                                </div>
+                                <div class="panel-body">
+                                    {{ tuser.followers }}
+                                </div>
                             </div>
-                        </dl>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {% for tweet in tweets %}
-            <div class="row tweet-card">
+            <div class="row">
                 <div class="col-xs-12">
-                    <p class="timestamp">{{ tweet.get_friendly_datetime() }}</span>
-                    <p>{{ tweet.text }}</p>
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            {{ tweet.text }}
+                        </div>
+                        <div class="panel-footer">
+                            {{ tweet.get_friendly_datetime() }}
+                        </div>
+                    </div>
                 </div>
             </div>
             {% endfor %}
 
         </div> <!-- .container -->
+
+        <div id="modal-bad-response" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Error</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>An error occurred when submitting your guess:</p>
+                        <pre></pre>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
 
         <script type="text/javascript" src="/static/js/all.js"></script>
         <script type="text/javascript">

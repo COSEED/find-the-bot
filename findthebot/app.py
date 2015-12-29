@@ -3,6 +3,7 @@ import time
 
 from flask import Flask, redirect, render_template, request
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.json import jsonify
 
 app = Flask(__name__)
 
@@ -193,16 +194,34 @@ def test_makeguess(test_id):
     user_id = request.form["tuser_id"]
     guess_is_bot = (request.form["guess_is_bot"] == "1")
 
-    guess = TestGuess(test_id=test_id, tuser_id=int(user_id), guess_is_bot=guess_is_bot)
-    db.session.add(guess)
-    db.session.commit()
+    try:
+        guess = TestGuess(test_id=test_id, tuser_id=int(user_id), guess_is_bot=guess_is_bot)
+        db.session.add(guess)
+        db.session.commit()
 
-    test = Test.query.filter(Test.id == test_id).first()
+        test = Test.query.filter(Test.id == test_id).first()
 
-    if len(test.guesses) >= len(test.selections):
-        return redirect("/test/%s/complete" % (test_id))
-    else:
-        return redirect("/test/%s/%d" % (test_id, len(test.guesses)))
+        resp = {
+            'success': True, 
+            'complete': len(test.guesses) >= len(test.selections),
+            'lessons': [
+                {
+                    'pointer_type': 'profile_photo',
+                    'pointer_id': None,
+                    'message_title': 'Stock Photo',
+                    'message_body': 'This is suspicious because the photo is a stock photo.'
+                },
+            ]
+        }
+
+        if resp['complete']:
+            resp['next'] = "/test/%s/complete" % (test_id)
+        else:
+            resp['next'] = "/test/%s/%d" % (test_id, len(test.guesses))
+
+        return jsonify(resp)
+    except e:
+        return jsonify({'success': False, 'error': e})
 
 @app.route('/test/<test_id>/<guess_id>')
 def test_showguess(test_id, guess_id):

@@ -1,18 +1,9 @@
-.tweet-card {
-    border: 1px solid #888;
-    border-width: 1px 1px 0 1px;
-}
-
-.tweet-card:last-child {
-    border-width: 1px;
-}
-
 .guess-header {
     background-color: #bbb;
     text-align: center;
     padding: 10px;
     width: 100%;
-    z-index: 1;
+    z-index: 2;
     margin: 0;
 }
 .guess-header.affix-top {
@@ -26,14 +17,29 @@
     left: 0;
 }
 
-.guess-header input[type="submit"].btn-default {
+.guess-header .btn-default {
     color: white;
     background: black;
 }
 
-.guess-header input[type="submit"].btn-default:active {
+.guess-header .btn-default:active {
     color: white;
     background: #888;
+}
+
+.guess-header .guess-form .glyphicon {
+    visibility: hidden;
+}
+
+.guess-header .guess-form-guessed .glyphicon {
+    visibility: visible;
+}
+
+.guess-header .guess-correct.guess-form-guessed .glyphicon {
+    color: #5cb85c;
+}
+.guess-header .guess-incorrect.guess-form-guessed .glyphicon {
+    color: #d9534f;
 }
 
 .profile {
@@ -54,4 +60,27 @@
     line-height: 46px;
     vertical-align: middle;
     margin: 0;
+}
+
+.lessons-modal {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: 0.6;
+    z-index: 1;
+}
+
+.lessons-modal-global {
+    position: fixed;
+}
+
+.lessons-modal-header {
+    position: absolute;
+}
+
+.poke {
+    position: absolute;
+    z-index: 1;
 }

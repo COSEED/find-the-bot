@@ -8,6 +8,10 @@ var paths = {
       'node_modules/bootstrap/dist/js/bootstrap.js',
       'html/js/**/*.js'
   ],
+  fonts: [
+      'node_modules/bootstrap/dist/fonts/*',
+      'html/js/**/*.js'
+  ],
   stylesheets: [
       'node_modules/bootstrap/dist/css/bootstrap.css',
       'html/css/**/*.css'
@@ -22,8 +26,11 @@ gulp.task('clean-scripts', function(cb) {
   return del(['findthebot/static/js/*.js'], cb);
 });
 
-gulp.task('clean', ['clean-stylesheets', 'clean-scripts']);
+gulp.task('clean-fonts', function(cb) {
+  return del(['findthebot/static/fonts/*'], cb);
+});
 
+gulp.task('clean', ['clean-stylesheets', 'clean-scripts', 'clean-fonts']);
 
 gulp.task('scripts', ['clean-scripts'], function() {
   // Minify and copy all JavaScript (except vendor scripts) 
@@ -31,6 +38,12 @@ gulp.task('scripts', ['clean-scripts'], function() {
   return gulp.src(paths.scripts)
     .pipe(concat('all.js'))
     .pipe(gulp.dest('findthebot/static/js/'));
+});
+
+gulp.task('fonts', ['clean-fonts'], function() {
+  // Copy all fonts
+  return gulp.src(paths.fonts)
+    .pipe(gulp.dest('findthebot/static/fonts/'));
 });
 
 gulp.task('stylesheets', ['clean-stylesheets'], function() {
@@ -47,4 +60,4 @@ gulp.task('watch', function() {
 });
  
 // The default task (called when you run `gulp` from cli) 
-gulp.task('default', ['clean', 'watch', 'scripts', 'stylesheets']);
+gulp.task('default', ['clean', 'watch', 'fonts', 'scripts', 'stylesheets']);
