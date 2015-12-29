@@ -1,6 +1,8 @@
 import os
 import time
 
+import logging
+
 from flask import Flask, redirect, render_template, request
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.json import jsonify
@@ -95,6 +97,7 @@ class Tuser(db.Model):
     db.Index('tuser_by_id_timestamp', user_id, timestamp)
 
     tweets = db.relationship('Tweet', primaryjoin="and_(foreign(Tweet.user_id)==Tuser.user_id)")
+    lessons = db.relationship('TuserLesson', lazy='joined')
 
     def __repr__(self):
         return '<TUser observation of @%s [user id=%d] at %d>' % (self.screen_name, int(self.user_id), self.timestamp)
@@ -130,6 +133,16 @@ class TeamBot(db.Model):
 
     db.Index('by_tuser_id', twitter_id)
 
+class TuserLesson(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tuser_id = db.Column(db.BigInteger, db.ForeignKey('tuser.id'))
+
+    pointer_type = db.Column(db.String(32))
+    pointer_id = db.Column(db.Text)
+    message_title = db.Column(db.Text)
+    message_body = db.Column(db.Text)
+
+    db.Index('tuserlesson_by_tuser_id', tuser_id)
 
 def find_results(bots, test):
     '''Given a set of bots and a test which is a set of selections (that may or may not be bots) and a set of guesses, 
@@ -194,34 +207,33 @@ def test_makeguess(test_id):
     user_id = request.form["tuser_id"]
     guess_is_bot = (request.form["guess_is_bot"] == "1")
 
-    try:
-        guess = TestGuess(test_id=test_id, tuser_id=int(user_id), guess_is_bot=guess_is_bot)
-        db.session.add(guess)
-        db.session.commit()
+    tuser = Tuser.query.filter(Tuser.id == user_id).first()
+    guess = TestGuess(test_id=test_id, tuser_id=int(user_id), guess_is_bot=guess_is_bot)
+    db.session.add(guess)
+    db.session.commit()
 
-        test = Test.query.filter(Test.id == test_id).first()
+    test = Test.query.filter(Test.id == test_id).first()
 
-        resp = {
-            'success': True, 
-            'complete': len(test.guesses) >= len(test.selections),
-            'lessons': [
-                {
-                    'pointer_type': 'profile_photo',
-                    'pointer_id': None,
-                    'message_title': 'Stock Photo',
-                    'message_body': 'This is suspicious because the photo is a stock photo.'
-                },
-            ]
-        }
+    resp = {
+        'complete': len(test.guesses) >= len(test.selections),
+        'lessons': [],
+    }
 
-        if resp['complete']:
-            resp['next'] = "/test/%s/complete" % (test_id)
-        else:
-            resp['next'] = "/test/%s/%d" % (test_id, len(test.guesses))
+    for lesson in tuser.lessons:
+        resp['lessons'].append({
+            'pointer_id': lesson.pointer_id,
+            'pointer_type': lesson.pointer_type,
+            'tuser_id': lesson.tuser_id,
+            'message_title': lesson.message_title,
+            'message_body': lesson.message_body,
+        })
 
-        return jsonify(resp)
-    except e:
-        return jsonify({'success': False, 'error': e})
+    if resp['complete']:
+        resp['next'] = "/test/%s/complete" % (test_id)
+    else:
+        resp['next'] = "/test/%s/%d" % (test_id, len(test.guesses))
+
+    return jsonify(resp)
 
 @app.route('/test/<test_id>/<guess_id>')
 def test_showguess(test_id, guess_id):

@@ -16,15 +16,15 @@ $.fn.hasBack = function() {
     return !(elem.css('background-color') === me.cache.color && elem.css('background-image') === me.cache.image);
 };
 
-$('.page-guess .guess-correct .btn').click(function() {
+$('.page-guess .guess-form.guess-correct .btn').click(function() {
     $(this).removeClass('btn-default').addClass('btn-success');
 });
 
-$('.page-guess .guess-incorrect .btn').click(function() {
+$('.page-guess .guess-form.guess-incorrect .btn').click(function() {
     $(this).removeClass('btn-default').addClass('btn-danger');
 });
 
-$('.page-guess .btn').click(function() {
+$('.page-guess .guess-form .btn').click(function() {
     // Show the glyph
     $(this).closest('.guess-form').addClass('guess-form-guessed');
 
@@ -45,8 +45,17 @@ $('.page-guess .btn').click(function() {
 
     $('.lessons-modal').removeClass('hidden');
 
-    $.post("/test/" + test_id + "/guess", postdata, function(response, textStatus, jqXHR) {
-        HandleGuessResponse(response);
+    $.ajax({
+        method: 'POST',
+        url: "/test/" + test_id + "/guess", 
+        data: postdata, 
+        success: function(response, textStatus, jqXHR) {
+            HandleGuessResponse(response);
+        },
+        error: function(jqXHR) {
+            $('#modal-bad-response').find('pre').text(jqXHR.responseText);
+            $('#modal-bad-response').modal();
+        }
     });
 });
 
@@ -79,23 +88,19 @@ function PokeHoleThroughModal($element)
 
 function HandleGuessResponse(response)
 {
-    if(!response.success) {
+    $('.guess-footer').removeClass('hidden');
+    $('.guess-footer a.btn').attr('href', response.next);
 
-        $('#modal-bad-response').find('pre').html(JSON.stringify(response));
-        $('#modal-bad-response').modal();
+    for(var i = 0; i < response.lessons.length; i++) {
+        var lesson = response.lessons[i];
+
+        ShowLesson(lesson);
+    }
+
+    if(response.complete) {
 
     } else {
-        for(var i = 0; i < response.lessons.length; i++) {
-            var lesson = response.lessons[i];
 
-            ShowLesson(lesson);
-        }
-
-        if(response.complete) {
-
-        } else {
-
-        }
     }
 }
 
@@ -116,6 +121,7 @@ function ShowLesson(lesson)
             title: lesson.message_title,
             animation: true,
             placement: "auto",
+            html: true,
         }).popover("show");
     }
 }

@@ -28,18 +28,23 @@
 }
 
 .guess-header .guess-form .glyphicon {
-    visibility: hidden;
+    display: none;
 }
 
 .guess-header .guess-form-guessed .glyphicon {
-    visibility: visible;
+    display: inline-block;
 }
 
-.guess-header .guess-correct.guess-form-guessed .glyphicon {
-    color: #5cb85c;
-}
-.guess-header .guess-incorrect.guess-form-guessed .glyphicon {
-    color: #d9534f;
+.guess-footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 65px;
+    background-color: #bbb;
+    text-align: center;
+    padding: 10px;
+    z-index: 2;
+    margin: 0;
 }
 
 .profile {
