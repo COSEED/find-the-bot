@@ -5,6 +5,8 @@ var del = require('del');
 var paths = {
   scripts: [
       'node_modules/jquery/dist/jquery.js',
+      'node_modules/jquery.scrollto/jquery.scrollTo.min.js',
+      'node_modules/is-in-viewport/lib/isInViewport.min.js',
       'node_modules/bootstrap/dist/js/bootstrap.js',
       'html/js/**/*.js'
   ],

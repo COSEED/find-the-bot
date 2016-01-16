@@ -70,7 +70,9 @@ function PokeHoleThroughModal($element)
         var clientRects = $element.get(0).getClientRects()[0];
         $clone.css({
             "top": clientRects.top + window.scrollY,
-            "left": clientRects.left + window.scrollX
+            "left": clientRects.left + window.scrollX,
+            "width": clientRects.right - clientRects.left,
+            "height": clientRects.bottom - clientRects.top,
         });
     };
 
@@ -89,18 +91,34 @@ function PokeHoleThroughModal($element)
 function HandleGuessResponse(response)
 {
     $('.guess-footer').removeClass('hidden');
-    $('.guess-footer a.btn').attr('href', response.next);
 
-    for(var i = 0; i < response.lessons.length; i++) {
-        var lesson = response.lessons[i];
+    HandleGuessResponse_ClickHandler(response, 0);
+}
 
-        ShowLesson(lesson);
-    }
-
-    if(response.complete) {
-
+function HandleGuessResponse_ClickHandler(response, currentIndex)
+{
+    if(currentIndex == response.lessons.length) {
+        window.location = response.next;
     } else {
+        var target;
+        $('.guess-footer a.btn').one('click', function() { 
+            if(target) {
+                target.$clone.popover('destroy');
+                target.$clone.remove();
+            }
 
+            HandleGuessResponse_ClickHandler(response, currentIndex + 1); 
+        });
+        target = ShowLesson(response.lessons[currentIndex]);
+        
+        if(!target.$target.is(":in-viewport")) {
+            $(window).scrollTo(target.$clone, {
+                duration: 500,
+                offset: {
+                    top: -200
+                }
+            });
+        }
     }
 }
 
@@ -110,6 +128,24 @@ function ShowLesson(lesson)
 
     if(lesson.pointer_type == 'profile_photo') {
         $target = $(".icon img");
+    } else if(lesson.pointer_type == 'tweet') {
+        $target = $("#tweet-" + lesson.pointer_id);
+    } else if(lesson.pointer_type == 'tweet_count') {
+        $target = $("#tweet_count");
+    } else if(lesson.pointer_type == 'follower_count') {
+        $target = $("#follower_count");
+    } else if(lesson.pointer_type == 'following_count') {
+        $target = $("#following_count");
+    } else if(lesson.pointer_type == 'full_name') {
+        $target = $("#full_name");
+    } else if(lesson.pointer_type == 'screen_name') {
+        $target = $("#screen_name");
+    } else if(lesson.pointer_type == 'location') {
+        $target = $("#location");
+    } else if(lesson.pointer_type == 'website') {
+        $target = $("#website");
+    } else if(lesson.pointer_type == 'bio') {
+        $target = $("#bio");
     }
 
     if($target) {
@@ -123,5 +159,10 @@ function ShowLesson(lesson)
             placement: "auto",
             html: true,
         }).popover("show");
+
+        return {
+            $target: $target,
+            $clone: $clone
+        };
     }
 }

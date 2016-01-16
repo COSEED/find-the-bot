@@ -1,10 +1,14 @@
+.popover {
+    z-index: 3;
+}
+
 .guess-header {
     background-color: #bbb;
     text-align: center;
     padding: 10px;
     width: 100%;
-    z-index: 2;
     margin: 0;
+    z-index: 2;
 }
 .guess-header.affix-top {
     position: absolute;
@@ -15,6 +19,7 @@
     position: fixed;
     top: 0;
     left: 0;
+    z-index: 4;
 }
 
 .guess-header .btn-default {
@@ -50,6 +55,14 @@
 .profile {
     margin-top: 100px;
     margin-bottom: 30px;
+}
+
+.bio, .location, .website {
+    background: #fff;
+}
+
+.bio.poke, .location.poke, .website.poke {
+    outline: 5px solid white;
 }
 
 .icon {
