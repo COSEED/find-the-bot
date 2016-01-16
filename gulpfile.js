@@ -61,3 +61,4 @@ gulp.task('watch', function() {
  
 // The default task (called when you run `gulp` from cli) 
 gulp.task('default', ['clean', 'watch', 'fonts', 'scripts', 'stylesheets']);
+gulp.task('all', ['clean', 'fonts', 'scripts', 'stylesheets']);

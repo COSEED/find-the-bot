@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "postinstall": "gulp scripts && gulp stylesheets"
+    "postinstall": "gulp all"
   },
   "dependencies": {
     "bootstrap": "^3.3.5",
