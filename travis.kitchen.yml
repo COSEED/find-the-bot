@@ -11,6 +11,4 @@ platforms:
 suites:
   - name: test
     run_list:
-        - recipe[findthebot::create_file]
-        - recipe[findthebot::template_file]
-        - recipe[rsyslog::default]
+        - recipe[findthebot::install]
