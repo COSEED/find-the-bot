@@ -1,16 +1,14 @@
-language: python
-python: 2.7
-services:
-    - postgresql
-env: 
-    - DATABASE_URL=postgresql+psycopg2://travis@localhost/travis_ci_test PORT=5000
-before_script:
-    - gem install foreman
-    - psql -c 'create database travis_ci_test;' -U postgres
-    - python migrate.py db upgrade
-    - psql -U postgres travis_ci_test < tests/fixture/test-data.sql
-script: 
-    - py.test
-    - foreman start web &
-    - sleep 1
-    - curl http://localhost:$PORT
+sudo: required
+language: go
+
+install:
+    # Install Chef via the Omnibus installer + ChefDK
+  - curl -L https://www.chef.io/chef/install.sh | sudo bash -s -- -P chefdk
+    # Chef includes an embedded installation of Ruby. Update RubyGems from within that embedded Ruby. 
+  - chef exec gem install bundler
+  - chef exec bundle update
+
+script:
+    # Within the Chef embedded ruby, within the environment that includes binaries that were installed by RubyGems, 
+    # run kitchen test. 
+    - KITCHEN_YAML=travis.kitchen.yml chef exec bundle exec kitchen test

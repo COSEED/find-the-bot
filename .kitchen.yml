@@ -1,0 +1,18 @@
+---
+driver:
+  name: vagrant
+  synced_folders:
+      - [".", "/find-the-bot", ":create => true, :group => 'vagrant', :owner => 'vagrant' "]
+
+provisioner:
+  name: chef_zero
+
+platforms:
+  - name: ubuntu-14.04
+
+suites:
+  - name: test
+    run_list:
+        - recipe[findthebot::create_file]
+        - recipe[findthebot::template_file]
+        - recipe[rsyslog::default]

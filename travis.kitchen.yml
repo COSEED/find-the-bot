@@ -1,0 +1,16 @@
+---
+driver:
+  name: localhost
+
+provisioner:
+  name: chef_zero
+
+platforms:
+  - name: localhost
+
+suites:
+  - name: test
+    run_list:
+        - recipe[findthebot::create_file]
+        - recipe[findthebot::template_file]
+        - recipe[rsyslog::default]

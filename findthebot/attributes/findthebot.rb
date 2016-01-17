@@ -1,0 +1,1 @@
+default['findthebot']['color'] = 'red'

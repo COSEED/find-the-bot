@@ -1,0 +1,9 @@
+This is a demo template for the project "findthebot" showing some capabilities of ERB. 
+
+This is an interesting example because it involves two layers of templating. As you can see in the [original source](https://github.com/jacobgreenleaf/test/blob/master/cookbooks/test/recipes/default.rb),
+the first layer of templating is done when the project is created using [EJS](http://ejs.co/) through [Yeoman](http://yeoman.io/authoring/file-system.html). The second layer of 
+templating is done when the cookbooks are run at build time or on demand using Chef-Zero. It uses [ERB](http://www.stuartellis.eu/articles/erb/) (embedded ruby). 
+
+This file was generated on <%= Time.now.strftime('%A') %> on the node <%= node[:fqdn] %>.
+
+This cookbook's favorite color is <%= @color %>, and it is stored in the Chef attribute node[:findthebot][:color], put in this template as the variable `color`.

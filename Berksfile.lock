@@ -1,0 +1,10 @@
+DEPENDENCIES
+  findthebot
+    path: findthebot
+  rsyslog (~> 4.0.0)
+
+GRAPH
+  compat_resource (12.5.26)
+  findthebot (0.1.0)
+  rsyslog (4.0.0)
+    compat_resource (>= 0.0.0)
