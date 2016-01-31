@@ -11,9 +11,40 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-12">
-                    <p class="text-center">
-                        <a class="btn btn-primary btn-large btn-default" href="/test/difficulty">Take a new test</a>
-                    </p>
+                    <h1>Exercise I - Spot the bot</h1>
+
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dolor purus, venenatis a posuere vel, tristique vel risus. Ut consectetur massa et enim rutrum lobortis. Quisque nec venenatis ligula, id sodales nisl. Etiam eget ante dolor. Aenean dignissim, leo non semper molestie, odio eros rhoncus lorem, non tristique est dolor eget risus. Integer feugiat commodo tellus. Cras egestas, odio at fringilla tempus, nibh nisl commodo urna, ut consectetur neque eros egestas nibh. Praesent et dictum nisl. Sed tellus ex, hendrerit non blandit a, ornare ut lectus. Donec a ex metus. Suspendisse porta massa odio.</p>
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 text-center"><h2>Choose difficulty</h2></div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <!-- easy -->
+                    <form class="form-inline text-center" method="post" action="/test/new">
+                        <input type="hidden" name="difficulty" value="easy" />
+                        <input type="submit" class="btn btn-large btn-success" value="Easy" />
+                    </form>
+                </div>
+
+                <div class="col-md-4">
+                    <!-- medium -->
+                    <form class="form-inline text-center" method="post" action="/test/new">
+                        <input type="hidden" name="difficulty" value="medium" />
+                        <input type="submit" class="btn btn-large btn-primary" value="Medium" />
+                    </form>
+                </div>
+
+                <div class="col-md-4">
+                    <!-- hard -->
+                    <form class="form-inline text-center" method="post" action="/test/new">
+                        <input type="hidden" name="difficulty" value="hard" />
+                        <input type="submit" class="btn btn-large btn-danger" value="Hard" />
+                    </form>
                 </div>
             </div>
         </div>

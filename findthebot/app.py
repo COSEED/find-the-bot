@@ -192,10 +192,6 @@ def find_results(bots, test):
 def index():
     return render_template("index.html")
 
-@app.route('/test/difficulty')
-def test_choose_difficulty():
-    return render_template("test_choose_difficulty.html")
-
 @app.route('/test/new', methods=['POST'])
 def test_new():
     test = Test()
@@ -225,7 +221,7 @@ def test_done(test_id):
 @app.route('/test/<test_id>/guess', methods=['POST'])
 def test_makeguess(test_id):
     user_id = request.form["tuser_id"]
-    guess_is_bot = (request.form["guess_is_bot"] == "1")
+    guess_is_bot = request.form["guess_is_bot"] == "1"
 
     tuser = Tuser.query.filter(Tuser.id == user_id).first()
     guess = TestGuess(test_id=test_id, tuser_id=int(user_id), guess_is_bot=guess_is_bot)

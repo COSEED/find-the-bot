@@ -36,11 +36,11 @@ $('.page-guess .guess-form .btn').click(function() {
 
     var test_id = $form.attr('data-test-id');
     var tuser_id = $form.attr('data-tuser-id');
-    var is_bot = Boolean($form.attr('data-bot'));
+    var guess_is_bot = $form.attr('data-bot');
 
     var postdata = {
         tuser_id: tuser_id,
-        guess_is_bot: is_bot,
+        guess_is_bot: guess_is_bot
     };
 
     $('.lessons-modal').removeClass('hidden');
