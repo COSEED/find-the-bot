@@ -114,7 +114,7 @@ class Tweet(db.Model):
     timestamp = db.Column(db.Integer)
     interesting = db.Column(db.Boolean)
 
-    db.Index('tweet_by_tweet_id', tweet_id)
+    db.Index('tweet_by_tweet_id_uniq', tweet_id, unique=True)
     db.Index('tweet_by_user_id_by_time', user_id, timestamp)
 
     def get_friendly_datetime(self):
@@ -134,6 +134,8 @@ class TeamBot(db.Model):
     db.Index('by_tuser_id', twitter_id)
 
 class TuserLesson(db.Model):
+    __tablename__ = "tuser_lesson"
+
     id = db.Column(db.Integer, primary_key=True)
     tuser_id = db.Column(db.BigInteger, db.ForeignKey('tuser.id'))
 
@@ -143,6 +145,24 @@ class TuserLesson(db.Model):
     message_body = db.Column(db.Text)
 
     db.Index('tuserlesson_by_tuser_id', tuser_id)
+
+class TweetEntity(db.Model):
+    __tablename__ = "tweet_entity"
+
+    id = db.Column(db.Integer, primary_key=True)
+    tweet_id = db.Column(db.BigInteger, db.ForeignKey('tweet.tweet_id'))
+    type = db.Column(db.Text)
+    text = db.Column(db.Text)
+
+    db.Index('tweetentity_by_tweet_id', tweet_id)
+
+class TweetEdge(db.Model):
+    __tablename__ = "tuser_tuser"
+
+    id = db.Column(db.BigInteger, primary_key=True)
+    from_user = db.Column(db.String(32))
+    to_user = db.Column(db.String(32))
+    weight = db.Column(db.Integer)
 
 def find_results(bots, test):
     '''Given a set of bots and a test which is a set of selections (that may or may not be bots) and a set of guesses, 
