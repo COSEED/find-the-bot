@@ -15,6 +15,7 @@ if os.getenv('DATABASE_URL') is None:
     raise ValueError('Missing DATABASE_URL')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+app.config['SQLALCHEMY_ECHO'] = debug
 
 db = SQLAlchemy(app)
 
@@ -116,6 +117,7 @@ class Tweet(db.Model):
 
     db.Index('tweet_by_tweet_id_uniq', tweet_id, unique=True)
     db.Index('tweet_by_user_id_by_time', user_id, timestamp)
+    db.Index('tweet_by_timestamp', timestamp)
 
     def get_friendly_datetime(self):
         return time.strftime("%d %b, %I:%M%p", time.gmtime(self.timestamp))
@@ -264,6 +266,54 @@ def test_showguess(test_id, guess_id):
     tuser_is_bot = len(TeamBot.query.filter(TeamBot.twitter_id == tuser.user_id).all()) > 0
 
     return render_template("test_guess.html", guess_id=int(guess_id), test=test, tuser=tuser, tweets=tweets, is_bot=tuser_is_bot)
+
+@app.route('/stream')
+def tweet_stream():
+
+    FRACTION_BOT_TWEETS = 1
+    FRACTION_NOISE_TWEETS = 0.01
+
+    frac_bot_tweet = request.args.get('frac_bot_tweet', '')
+    if frac_bot_tweet == '':
+        frac_bot_tweet = FRACTION_BOT_TWEETS 
+    else:
+        frac_bot_tweet = float(frac_bot_tweet)
+
+    frac_noise_tweet = request.args.get('frac_noise_tweet', '')
+    if frac_noise_tweet == '':
+        frac_noise_tweet = FRACTION_NOISE_TWEETS 
+    else:
+        frac_noise_tweet = float(frac_NOISE_tweet)
+
+    # Chosen by finding the magic time window [1419090684, 1419133884). Then, found
+    # the lowest tweet ID above the lower bound and the highest tweet ID below the upper bound. That is,
+    # SELECT min(id) FROM tweet WHERE timestamp >= 1419090684
+    # SELECT max(id) FROM tweet WHERE timestamp < 1419133884
+
+    MAGIC_TWEET_ID_WINDOW_START = 16130160 # Twitter tweet ID 546332554069282817
+    MAGIC_TWEET_ID_WINDOW_END = 20498910 # Twitter tweet ID 539385076790730752
+
+    # I just looked these values up in the database from the above two boundary tweets.
+    MAGIC_TWEET_START_TIMESTAMP = 1419090805 # Twitter tweet ID 546332554069282817 occurred at this timestamp
+    MAGIC_TWEET_END_TIMESTAMP = 1417434398 # Twitter tweet ID 546332554069282817 occurred at this timestamp
+
+    # This parameter controls what real time corresponds to the start of the virtual time.
+    # Reset this to the current unix epoch "reset the clock"
+    # 1455161557 = 7:32pm PT, Wednesday February 10, 2016
+    GLOBAL_TIME_OFFSET_PLAYBACK_START = 1455161557
+
+    GLOBAL_TIME_OFFSET = GLOBAL_TIME_OFFSET_PLAYBACK_START - MAGIC_TWEET_START_TIMESTAMP
+
+    tweets = Tweet.query.join(TeamBot, TeamBot.twitter_id == Tweet.user_id, isouter=True)
+    tweets = tweets.filter(Tweet.id >= MAGIC_TWEET_ID_WINDOW_START)
+    tweets = tweets.filter(Tweet.id < MAGIC_TWEET_ID_WINDOW_END)
+    tweets = tweets.filter(Tweet.timestamp < (time.time() - GLOBAL_TIME_OFFSET))
+    #tweets = tweets.with_hint(Tweet, 'USE INDEX tweet_by_timestamp')
+    tweets = tweets.order_by(Tweet.timestamp.desc())
+    tweets = tweets.limit(20)
+    tweets = tweets.all()
+
+    return jsonify(tweets=[tweet.text for tweet in tweets])
 
 if __name__ == "__main__":
     app.run(debug=debug, host='0.0.0.0', port=int(os.getenv("PORT")))
