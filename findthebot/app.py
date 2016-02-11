@@ -17,6 +17,7 @@ if os.getenv('DATABASE_URL') is None:
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_ECHO'] = debug
 
+
 db = SQLAlchemy(app)
 
 DIFFICULTY_EASY = 'easy'
@@ -296,20 +297,22 @@ def tweet_stream():
     GLOBAL_TIME_OFFSET = GLOBAL_TIME_OFFSET_PLAYBACK_START - MAGIC_TWEET_START_TIMESTAMP
     TIME_WINDOW = 30
 
-    noisetweets = Tweet.query.join(TeamBot, TeamBot.twitter_id == Tweet.user_id, isouter=True)
+    bot_user_ids = [bot.twitter_id for bot in TeamBot.query.all()]
+
+    noisetweets = Tweet.query.filter(~Tweet.user_id.in_(bot_user_ids))
     noisetweets = noisetweets.filter(Tweet.timestamp < (time.time() - GLOBAL_TIME_OFFSET))
+    noisetweets = noisetweets.filter(Tweet.timestamp >= (time.time() - GLOBAL_TIME_OFFSET - TIME_WINDOW))
     noisetweets = noisetweets.filter(Tweet.timestamp >= (time.time() - GLOBAL_TIME_OFFSET - TIME_WINDOW))
     noisetweets = noisetweets.order_by(Tweet.timestamp.desc())
     noisetweets = noisetweets.all()
 
-    bottweets = Tweet.query.join(TeamBot, TeamBot.twitter_id == Tweet.user_id, isouter=False)
-    bottweets = bottweets.add_column(TeamBot.screen_name)
+    bottweets = Tweet.query.filter(Tweet.user_id.in_(bot_user_ids))
     bottweets = bottweets.filter(Tweet.timestamp < (time.time() - GLOBAL_TIME_OFFSET))
     bottweets = bottweets.filter(Tweet.timestamp >= (time.time() - GLOBAL_TIME_OFFSET - TIME_WINDOW))
     bottweets = bottweets.order_by(Tweet.timestamp.desc())
     bottweets = bottweets.all()
 
-    return jsonify(bottweets=[(screen_name, tweet.text) for (tweet, screen_name) in bottweets], noisetweets=[tweet.text for tweet in noisetweets])
+    return jsonify(bottweets=[tweet.text for tweet in bottweets], noisetweets=[tweet.text for tweet in noisetweets])
 
 if __name__ == "__main__":
     app.run(debug=debug, host='0.0.0.0', port=int(os.getenv("PORT")))
