@@ -20,6 +20,7 @@
     left: calc(20% + 40px);
     top: 0;
     padding: 20px;
+    overflow: scroll;
 }
 
 #leftpanel .nav {

@@ -45,7 +45,7 @@ var Tracker = React.createClass({
         }
 
         if(tweets.length == 0) {
-            tweets.push(<p key={'loading'}>Loading...</p>);
+            tweets.push(<p key={'loading'}>Loading tweets...</p>);
         }
 
         var refresh = [];
