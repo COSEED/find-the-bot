@@ -14,7 +14,8 @@ var Tracker = React.createClass({
 
     getInitialState: function() {
         return {
-            tweets: []
+            tweets: [],
+            refreshing: false
         };
     },
     
@@ -23,11 +24,16 @@ var Tracker = React.createClass({
             url: '/stream',
             success: this._updateStream
         });
+
+        this.setState({
+            refreshing: true
+        });
     },
 
     _updateStream: function(result, textStatus, jqXHR) {
         this.setState({
-            tweets: result.tweets
+            tweets: result.tweets,
+            refreshing: false
         });
     },
 
@@ -42,14 +48,21 @@ var Tracker = React.createClass({
             tweets.push(<p key={'loading'}>Loading...</p>);
         }
 
+        var refresh = [];
+
+        if(this.state.refreshing) {
+            refresh.push(<span className="glyphicon glyphicon-refresh"></span>);
+        }
+
         return <div>
             <div id="leftpanel">
-                <div className="nav nav-active firehose">
+                <div className="nav nav-active nav-loading firehose">
                     <span className="header">Firehose</span>
+                    {refresh}
                 </div>
 
                 <div className="nav tag">
-                    <span className="header">Track Tags</span>
+                    <span className="header">Track Tags <span className="glyphicon glyphicon-plus"></span></span>
                     <div className="entries">
                         <ul>
                             <li>#daesh</li>
@@ -60,7 +73,7 @@ var Tracker = React.createClass({
                 </div>
 
                 <div className="nav profile">
-                    <span className="header">Track Profiles</span>
+                    <span className="header">Track Profiles <span className="glyphicon glyphicon-plus"></span></span>
                     <div className="entries">
                         <ul>
                             <li>@everyslug</li>

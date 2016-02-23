@@ -12,6 +12,7 @@ var paths = {
   ],
   trackerscripts: [
       'node_modules/jquery/dist/jquery.js',
+      'node_modules/bootstrap/dist/js/bootstrap.js',
       'html/js/tracker/*.js'
   ],
   react: [
@@ -27,6 +28,7 @@ var paths = {
       'html/css/spotter/**/*.css'
   ],
   trackerstylesheets: [
+      'node_modules/bootstrap/dist/css/bootstrap.css',
       'html/css/tracker/**/*.css'
   ]
 };

@@ -31,3 +31,16 @@
     background: #444;
     color: #eee;
 }
+
+#leftpanel .nav li {
+    list-style-type: none;
+}
+
+#leftpanel .nav .header .glyphicon-plus {
+    float: right;
+}
+
+#leftpanel .nav.nav-loading .glyphicon-refresh {
+    float: right;
+    color: #bbb;
+}
