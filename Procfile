@@ -1,2 +1,2 @@
 web: python findthebot/app.py
-dev: node_modules/gulp/bin/gulp.js watch
+dev: node_modules/gulp/bin/gulp.js && node_modules/gulp/bin/gulp.js watch

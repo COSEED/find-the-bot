@@ -274,45 +274,45 @@ def tweet_stream():
     FRACTION_BOT_TWEETS = 1
     FRACTION_NOISE_TWEETS = 0.01
 
-    frac_bot_tweet = request.args.get('frac_bot_tweet', '')
-    if frac_bot_tweet == '':
-        frac_bot_tweet = FRACTION_BOT_TWEETS 
-    else:
-        frac_bot_tweet = float(frac_bot_tweet)
-
-    frac_noise_tweet = request.args.get('frac_noise_tweet', '')
-    if frac_noise_tweet == '':
-        frac_noise_tweet = FRACTION_NOISE_TWEETS 
-    else:
-        frac_noise_tweet = float(frac_NOISE_tweet)
+    noise = bool(request.args.get('noise', '0'))
 
     MAGIC_TWEET_START_TIMESTAMP = 1419090805 # Twitter tweet ID 546332554069282817 occurred at this timestamp
     MAGIC_TWEET_END_TIMESTAMP = 1417434398 # Twitter tweet ID 546332554069282817 occurred at this timestamp
 
+    # Real number [0, +inf). 1 means each wall clock second = 1 virtual second. 0.1 means ten wall clock seconds to every virtual second (clock runs slow)
+    TIMESTAMP_FLOW_SPEED = 0.1
+
     # This parameter controls what real time corresponds to the start of the virtual time.
     # Reset this to the current unix epoch "reset the clock"
     # 1455161557 = 7:32pm PT, Wednesday February 10, 2016
-    GLOBAL_TIME_OFFSET_PLAYBACK_START = 1455161557
+    WALL_TIME_ZERO = 1455161557
 
-    GLOBAL_TIME_OFFSET = GLOBAL_TIME_OFFSET_PLAYBACK_START - MAGIC_TWEET_START_TIMESTAMP
+    # Request the last TIME_WINDOW virtual seconds of tweets
     TIME_WINDOW = 30
 
     bot_user_ids = [bot.twitter_id for bot in TeamBot.query.all()]
 
-    noisetweets = Tweet.query.filter(~Tweet.user_id.in_(bot_user_ids))
-    noisetweets = noisetweets.filter(Tweet.timestamp < (time.time() - GLOBAL_TIME_OFFSET))
-    noisetweets = noisetweets.filter(Tweet.timestamp >= (time.time() - GLOBAL_TIME_OFFSET - TIME_WINDOW))
-    noisetweets = noisetweets.filter(Tweet.timestamp >= (time.time() - GLOBAL_TIME_OFFSET - TIME_WINDOW))
-    noisetweets = noisetweets.order_by(Tweet.timestamp.desc())
-    noisetweets = noisetweets.all()
+    tweets = None
+    if noise:
+        tweets = Tweet.query.filter(~Tweet.user_id.in_(bot_user_ids))
+    else:
+        tweets = Tweet.query.filter(Tweet.user_id.in_(bot_user_ids))
 
-    bottweets = Tweet.query.filter(Tweet.user_id.in_(bot_user_ids))
-    bottweets = bottweets.filter(Tweet.timestamp < (time.time() - GLOBAL_TIME_OFFSET))
-    bottweets = bottweets.filter(Tweet.timestamp >= (time.time() - GLOBAL_TIME_OFFSET - TIME_WINDOW))
-    bottweets = bottweets.order_by(Tweet.timestamp.desc())
-    bottweets = bottweets.all()
+    #virtual_time = MAGIC_TWEET_START_TIMESTAMP
 
-    return jsonify(bottweets=[tweet.text for tweet in bottweets], noisetweets=[tweet.text for tweet in noisetweets])
+    virtual_time = time.time()
+    virtual_time += MAGIC_TWEET_START_TIMESTAMP - WALL_TIME_ZERO
+
+    tweets = tweets.filter(Tweet.timestamp < virtual_time)
+    tweets = tweets.filter(Tweet.timestamp >= (virtual_time - TIME_WINDOW))
+    tweets = tweets.order_by(Tweet.timestamp.desc())
+    tweets = tweets.all()
+
+    return jsonify(tweets=[{'tweet_id': tweet.tweet_id, 'text': tweet.text} for tweet in tweets])
+
+@app.route('/tracker')
+def tracker():
+    return render_template("tracker.html")
 
 if __name__ == "__main__":
     app.run(debug=debug, host='0.0.0.0', port=int(os.getenv("PORT")))
