@@ -1,7 +1,7 @@
 var Tweet = React.createClass({
     render: function() {
-        return <div>
-            <p>{this.props.tweet.text}</p>
+        return <div className="tweet">
+            <p dangerouslySetInnerHTML={{__html: this.props.tweet.text}} />
         </div>;
     }
 });
@@ -38,8 +38,41 @@ var Tracker = React.createClass({
             tweets.push(<Tweet key={this.state.tweets[i].tweet_id} tweet={this.state.tweets[i]} />);
         }
 
+        if(tweets.length == 0) {
+            tweets.push(<p key={'loading'}>Loading...</p>);
+        }
+
         return <div>
-            {tweets}
+            <div id="leftpanel">
+                <div className="nav nav-active firehose">
+                    <span className="header">Firehose</span>
+                </div>
+
+                <div className="nav tag">
+                    <span className="header">Track Tags</span>
+                    <div className="entries">
+                        <ul>
+                            <li>#daesh</li>
+                            <li>#hillary</li>
+                            <li>#starwars</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div className="nav profile">
+                    <span className="header">Track Profiles</span>
+                    <div className="entries">
+                        <ul>
+                            <li>@everyslug</li>
+                            <li>@libthebasedbot</li>
+                            <li>@jeb_bush_baby</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div id="mainpanel">
+                {tweets}
+            </div>
         </div>;
     }
 });

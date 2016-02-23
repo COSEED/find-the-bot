@@ -1,0 +1,33 @@
+#leftpanel {
+    width: 20%;
+    min-width: 200px;
+    vertical-align: top;
+    position: fixed;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: #EEE;
+    padding: 20px 0;
+}
+
+#mainpanel {
+    width: 80%;
+    min-width: 800px;
+    display: inline-block;
+    vertical-align: top;
+    position: fixed;
+    height: 100%;
+    left: calc(20% + 40px);
+    top: 0;
+    padding: 20px;
+}
+
+#leftpanel .nav {
+    margin: 10px 0;
+    padding: 5px 20px;
+}
+
+#leftpanel .nav-active {
+    background: #444;
+    color: #eee;
+}

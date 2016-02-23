@@ -22,14 +22,21 @@ var paths = {
       'node_modules/bootstrap/dist/fonts/*',
       'html/js/spotter/**/*.js'
   ],
-  stylesheets: [
+  spotstylesheets: [
       'node_modules/bootstrap/dist/css/bootstrap.css',
-      'html/css/**/*.css'
+      'html/css/spotter/**/*.css'
+  ],
+  trackerstylesheets: [
+      'html/css/tracker/**/*.css'
   ]
 };
  
-gulp.task('clean-stylesheets', function(cb) {
-  return del(['findthebot/static/css/*.css'], cb);
+gulp.task('clean-spotstylesheets', function(cb) {
+  return del(['findthebot/static/css/all.css'], cb);
+});
+
+gulp.task('clean-trackerstylesheets', function(cb) {
+  return del(['findthebot/static/css/tracker.css'], cb);
 });
 
 gulp.task('clean-spotscripts', function(cb) {
@@ -48,7 +55,7 @@ gulp.task('clean-fonts', function(cb) {
   return del(['findthebot/static/fonts/*'], cb);
 });
 
-gulp.task('clean', ['clean-stylesheets', 'clean-react', 'clean-trackerscripts', 'clean-spotscripts', 'clean-fonts']);
+gulp.task('clean', ['clean-spotstylesheets', 'clean-react', 'clean-trackerscripts', 'clean-spotscripts', 'clean-fonts']);
 
 gulp.task('spotscripts', ['clean-spotscripts'], function() {
   // Minify and copy all JavaScript (except vendor scripts) 
@@ -80,20 +87,29 @@ gulp.task('fonts', ['clean-fonts'], function() {
     .pipe(gulp.dest('findthebot/static/fonts/'));
 });
 
-gulp.task('stylesheets', ['clean-stylesheets'], function() {
+gulp.task('spotstylesheets', ['clean-spotstylesheets'], function() {
   // Minify and copy all JavaScript (except vendor scripts) 
   // with sourcemaps all the way down 
-  return gulp.src(paths.stylesheets)
+  return gulp.src(paths.spotstylesheets)
     .pipe(concat('all.css'))
+    .pipe(gulp.dest('findthebot/static/css/'));
+});
+
+gulp.task('trackerstylesheets', ['clean-trackerstylesheets'], function() {
+  // Minify and copy all JavaScript (except vendor scripts) 
+  // with sourcemaps all the way down 
+  return gulp.src(paths.trackerstylesheets)
+    .pipe(concat('tracker.css'))
     .pipe(gulp.dest('findthebot/static/css/'));
 });
 
 gulp.task('watch', function() {
     gulp.watch(paths.spotscripts, ['spotscripts']);
     gulp.watch(paths.trackerscripts, ['trackerscripts']);
-    gulp.watch(paths.stylesheets, ['stylesheets']);
+    gulp.watch(paths.spotstylesheets, ['spotstylesheets']);
+    gulp.watch(paths.trackerstylesheets, ['trackerstylesheets']);
 });
  
 // The default task (called when you run `gulp` from cli) 
-gulp.task('default', ['clean', 'watch', 'fonts', 'react', 'trackerscripts', 'spotscripts', 'stylesheets']);
-gulp.task('all', ['clean', 'fonts', 'react', 'trackerscripts', 'spotscripts', 'stylesheets']);
+gulp.task('default', ['clean', 'watch', 'fonts', 'react', 'trackerscripts', 'spotscripts', 'trackerstylesheets', 'spotstylesheets']);
+gulp.task('all', ['clean', 'fonts', 'react', 'trackerscripts', 'spotscripts', 'trackerstylesheets', 'spotstylesheets']);
