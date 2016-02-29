@@ -5,11 +5,11 @@ import logging
 
 from flask import Flask, redirect, render_template, request
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.profile import Profiler
 from flask.json import jsonify
 
+import psycopg2
+
 app = Flask(__name__)
-Profiler(app)
 
 debug = os.getenv('DEBUG') is not None
 
@@ -18,7 +18,6 @@ if os.getenv('DATABASE_URL') is None:
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_ECHO'] = debug
-
 
 db = SQLAlchemy(app)
 
@@ -292,6 +291,8 @@ def tweet_stream():
     # Request the last TIME_WINDOW virtual seconds of tweets
     TIME_WINDOW = 30
 
+    virtual_time = time.time()
+    virtual_time += MAGIC_TWEET_START_TIMESTAMP - WALL_TIME_ZERO
     bot_user_ids = [bot.twitter_id for bot in TeamBot.query.all()]
 
     tweets = None
@@ -300,11 +301,8 @@ def tweet_stream():
     else:
         tweets = Tweet.query.filter(Tweet.user_id.in_(bot_user_ids))
 
-    virtual_time = time.time()
-    virtual_time += MAGIC_TWEET_START_TIMESTAMP - WALL_TIME_ZERO
-
-    tweets = tweets.filter(Tweet.timestamp < virtual_time)
-    tweets = tweets.filter(Tweet.timestamp >= (virtual_time - TIME_WINDOW))
+    tweets = tweets.filter(Tweet.timestamp < int(virtual_time))
+    tweets = tweets.filter(Tweet.timestamp >= int((virtual_time - TIME_WINDOW)))
     tweets = tweets.order_by(Tweet.timestamp.desc())
     tweets = tweets.all()
 
