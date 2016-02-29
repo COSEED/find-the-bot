@@ -5,9 +5,11 @@ import logging
 
 from flask import Flask, redirect, render_template, request
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.profile import Profiler
 from flask.json import jsonify
 
 app = Flask(__name__)
+Profiler(app)
 
 debug = os.getenv('DEBUG') is not None
 
@@ -285,7 +287,7 @@ def tweet_stream():
     # This parameter controls what real time corresponds to the start of the virtual time.
     # Reset this to the current unix epoch "reset the clock"
     # 1455161557 = 7:32pm PT, Wednesday February 10, 2016
-    WALL_TIME_ZERO = 1455161557
+    WALL_TIME_ZERO = 1456765716
 
     # Request the last TIME_WINDOW virtual seconds of tweets
     TIME_WINDOW = 30
@@ -297,8 +299,6 @@ def tweet_stream():
         tweets = Tweet.query.filter(~Tweet.user_id.in_(bot_user_ids))
     else:
         tweets = Tweet.query.filter(Tweet.user_id.in_(bot_user_ids))
-
-    #virtual_time = MAGIC_TWEET_START_TIMESTAMP
 
     virtual_time = time.time()
     virtual_time += MAGIC_TWEET_START_TIMESTAMP - WALL_TIME_ZERO
