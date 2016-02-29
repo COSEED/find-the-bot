@@ -8,14 +8,13 @@ var Tweet = React.createClass({
 
 var Tracker = React.createClass({
     componentDidMount: function() {
-        window.setInterval(this._tick, 100);
+        window.setInterval(this._tick, 300);
         this._tick();
     },
 
     getInitialState: function() {
         return {
-            tweets: [],
-            refreshing: false
+            tweets: []
         };
     },
     
@@ -24,16 +23,11 @@ var Tracker = React.createClass({
             url: '/stream',
             success: this._updateStream
         });
-
-        this.setState({
-            refreshing: true
-        });
     },
 
     _updateStream: function(result, textStatus, jqXHR) {
         this.setState({
-            tweets: result.tweets,
-            refreshing: false
+            tweets: result.tweets
         });
     },
 
@@ -49,10 +43,6 @@ var Tracker = React.createClass({
         }
 
         var refresh = [];
-
-        if(this.state.refreshing) {
-            refresh.push(<span className="glyphicon glyphicon-refresh"></span>);
-        }
 
         return <div>
             <div id="leftpanel">
