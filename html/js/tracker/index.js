@@ -8,7 +8,7 @@ var Tweet = React.createClass({
 
 var Tracker = React.createClass({
     componentDidMount: function() {
-        window.setInterval(this._tick, 20*1000);
+        window.setInterval(this._tick, 100);
         this._tick();
     },
 
