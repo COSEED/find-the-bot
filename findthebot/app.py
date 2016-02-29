@@ -3,7 +3,9 @@ import time
 
 import logging
 
-from flask import Flask, redirect, render_template, request
+from functools import wraps
+
+from flask import Flask, redirect, render_template, request, Response
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.json import jsonify
 
@@ -16,8 +18,32 @@ debug = os.getenv('DEBUG') is not None
 if os.getenv('DATABASE_URL') is None:
     raise ValueError('Missing DATABASE_URL')
 
+if os.getenv('PASSWORD') is None:
+    raise ValueError('Missing PASSWORD')
+
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_ECHO'] = debug
+
+def check_auth(username, password):
+    """This function is called to check if a username /
+    password combination is valid.
+    """
+    return password == os.getenv('PASSWORD')
+
+def authenticate():
+    """Sends a 401 response that enables basic auth"""
+    return Response(
+    'You have to login with proper credentials', 401,
+    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
 
 db = SQLAlchemy(app)
 
@@ -193,10 +219,12 @@ def find_results(bots, test):
     return data
 
 @app.route('/')
+@requires_auth
 def index():
     return render_template("index.html")
 
 @app.route('/test/new', methods=['POST'])
+@requires_auth
 def test_new():
     test = Test()
     db.session.add(test)
@@ -213,6 +241,7 @@ def test_new():
     return redirect('/test/%d/0' % (test.id))
 
 @app.route('/test/<test_id>/complete')
+@requires_auth
 def test_done(test_id):
     test = Test.query.filter(Test.id == test_id).first()
     bots = TeamBot.query.all()
@@ -223,6 +252,7 @@ def test_done(test_id):
     return render_template("test_results.html", results=results)
 
 @app.route('/test/<test_id>/guess', methods=['POST'])
+@requires_auth
 def test_makeguess(test_id):
     user_id = request.form["tuser_id"]
     guess_is_bot = request.form["guess_is_bot"] == "1"
@@ -256,6 +286,7 @@ def test_makeguess(test_id):
     return jsonify(resp)
 
 @app.route('/test/<test_id>/<guess_id>')
+@requires_auth
 def test_showguess(test_id, guess_id):
     test = Test.query.filter(Test.id == test_id).first()
 
@@ -270,6 +301,7 @@ def test_showguess(test_id, guess_id):
     return render_template("test_guess.html", guess_id=int(guess_id), test=test, tuser=tuser, tweets=tweets, is_bot=tuser_is_bot)
 
 @app.route('/stream')
+@requires_auth
 def tweet_stream():
 
     FRACTION_BOT_TWEETS = 1
@@ -309,6 +341,7 @@ def tweet_stream():
     return jsonify(tweets=[{'tweet_id': tweet.tweet_id, 'text': tweet.text} for tweet in tweets])
 
 @app.route('/tracker')
+@requires_auth
 def tracker():
     return render_template("tracker.html")
 
