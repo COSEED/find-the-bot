@@ -8,26 +8,36 @@ var Tweet = React.createClass({
 
 var Tracker = React.createClass({
     componentDidMount: function() {
-        window.setInterval(this._tick, 300);
+        window.setInterval(this._tick, 100);
         this._tick();
     },
 
     getInitialState: function() {
         return {
-            tweets: []
+            tweets: [],
+            ajaxXHR: null
         };
     },
     
     _tick: function() {
-        $.ajax({
+        if(this.state.ajaxXHR !== null) {
+            return;
+        }
+
+        var ajaxXHR = $.ajax({
             url: '/stream',
             success: this._updateStream
+        });
+
+        this.setState({
+            ajaxXHR: ajaxXHR
         });
     },
 
     _updateStream: function(result, textStatus, jqXHR) {
         this.setState({
-            tweets: result.tweets
+            tweets: result.tweets,
+            ajaxXHR: null
         });
     },
 
