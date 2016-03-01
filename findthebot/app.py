@@ -125,7 +125,7 @@ class Tuser(db.Model):
 
     db.Index('tuser_by_id_timestamp', user_id, timestamp)
 
-    tweets = db.relationship('Tweet', primaryjoin="and_(foreign(Tweet.user_id)==Tuser.user_id)")
+    tweets = db.relationship('Tweet', primaryjoin="and_(foreign(Tweet.user_id)==Tuser.user_id)", order_by="desc(Tweet.timestamp)")
     lessons = db.relationship('TuserLesson', lazy='joined')
 
     def __repr__(self):
