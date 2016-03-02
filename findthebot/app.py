@@ -193,6 +193,7 @@ class TweetEdge(db.Model):
     from_user = db.Column(db.String(32))
     to_user = db.Column(db.String(32))
     weight = db.Column(db.Integer)
+    timestamp = db.Column(db.Integer)
 
 def find_results(bots, test):
     '''Given a set of bots and a test which is a set of selections (that may or may not be bots) and a set of guesses, 
