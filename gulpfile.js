@@ -21,6 +21,10 @@ var paths = {
   ],
   fonts: [
       'node_modules/bootstrap/dist/fonts/*',
+      'html/fonts/**/*.eot',
+      'html/fonts/**/*.ttf',
+      'html/fonts/**/*.woff',
+      'html/fonts/**/*.css',
       'html/js/spotter/**/*.js'
   ],
   spotstylesheets: [
