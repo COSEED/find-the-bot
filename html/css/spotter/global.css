@@ -1,6 +1,69 @@
+/* START NEW STYLES */
+
 body {
     font-family: "Circular Air Pro", Arial, sans-serif;
+    font-weight: 100;
 }
+
+p {
+	font-size: 14pt;
+}
+
+/* PANELS */
+
+.panel-title {
+	font-size: 10pt;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.panel-body {
+	font-size: 14pt;
+}
+
+.panel-footer {
+	font-size: 10pt;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+/* BUTTONS */
+
+.btn-default {
+	border-color: #FFF;
+}
+
+.input, .btn, .btn-large {
+	font-size: 22pt;
+	padding: 10px 20px;
+}
+
+.btn-primary {
+	background-color: #ffe000;
+	border-color: #ffda00;
+}
+
+.btn-primary:hover {
+	background-color: #ffda00;
+	border-color: #f7c800;
+}
+
+/* GUESS BUTTONS & HEADER */
+
+.guess-header {
+    background-color: #adfff2;
+}
+
+.guess-header .btn-default {
+    background-color: #150BB7;
+}
+
+.guess-header .btn-default:hover {
+	background-color: #181847;
+	border-color: #00eee2;
+}
+
+/* END NEW STYLES */
 
 .coseed-darkblue-color {
     color: #150BB7;
