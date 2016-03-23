@@ -15,7 +15,9 @@ var Tracker = React.createClass({
     getInitialState: function() {
         return {
             tweets: [],
-            ajaxXHR: null
+            ajaxXHR: null,
+            activeTag: null,
+            activeUser: null
         };
     },
     
@@ -26,6 +28,10 @@ var Tracker = React.createClass({
 
         var ajaxXHR = $.ajax({
             url: '/stream',
+            data: {
+                tag: this.state.activeTag,
+                user: this.state.activeUser
+            },
             success: this._updateStream
         });
 
@@ -38,6 +44,29 @@ var Tracker = React.createClass({
         this.setState({
             tweets: result.tweets,
             ajaxXHR: null
+        });
+    },
+        
+    handleFirehoseClick: function(e) {
+        this.setState({
+            activeTag: null,
+            activeUser: null
+        });
+    },
+
+    handleTagClick: function(e) {
+        var user = $(e.target).closest('li').attr('data-hashtag');
+
+        this.setState({
+            activeTag: hashtag
+        });
+    },
+
+    handleUserClick: function(e) {
+        var user = $(e.target).closest('li').attr('data-user');
+
+        this.setState({
+            activeUser: user
         });
     },
 
@@ -53,10 +82,33 @@ var Tracker = React.createClass({
         }
 
         var refresh = [];
+        var tags = [], users = [];
+
+        var tags_orig = ['daesh', 'hillary', 'starwars'];
+        var users_orig = ['everyslug', 'libthebasedbot', 'jeb_bush_baby', 't'];
+
+        for(var i = 0; i < tags_orig.length; i++) {
+
+        }
+
+        for(var i = 0; i < users_orig.length; i++) {
+            var cls = "";
+            if(this.state.activeUser === users_orig[i]) {
+                cls += "nav-active";
+            }
+
+            users.push(<li key={i} data-user={users_orig[i]} onClick={this.handleUserClick} className={cls}>@{users_orig[i]}</li>);
+        }
+
+        var firehose_cls = "nav  nav-loading firehose";
+
+        if(this.state.activeUser === null && this.state.activeTag === null) {
+            firehose_cls += " nav-active";
+        }
 
         return <div>
             <div id="leftpanel">
-                <div className="nav nav-active nav-loading firehose">
+                <div onClick={this.handleFirehoseClick} className={firehose_cls}>
                     <span className="header">Firehose</span>
                     {refresh}
                 </div>
@@ -65,9 +117,7 @@ var Tracker = React.createClass({
                     <span className="header">Track Tags <span className="glyphicon glyphicon-plus"></span></span>
                     <div className="entries">
                         <ul>
-                            <li>#daesh</li>
-                            <li>#hillary</li>
-                            <li>#starwars</li>
+                            {tags}
                         </ul>
                     </div>
                 </div>
@@ -76,9 +126,7 @@ var Tracker = React.createClass({
                     <span className="header">Track Profiles <span className="glyphicon glyphicon-plus"></span></span>
                     <div className="entries">
                         <ul>
-                            <li>@everyslug</li>
-                            <li>@libthebasedbot</li>
-                            <li>@jeb_bush_baby</li>
+                            {users}
                         </ul>
                     </div>
                 </div>

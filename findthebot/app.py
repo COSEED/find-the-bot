@@ -147,6 +147,8 @@ class Tweet(db.Model):
     db.Index('tweet_by_user_id_by_time', user_id, timestamp)
     db.Index('tweet_by_timestamp', timestamp)
 
+    entities = db.relationship('TweetEntity', lazy='joined')
+
     def get_friendly_datetime(self):
         return time.strftime("%d %b, %I:%M%p", time.gmtime(self.timestamp))
 
@@ -309,6 +311,8 @@ def tweet_stream():
     FRACTION_NOISE_TWEETS = 0.01
 
     noise = bool(request.args.get('noise', '0'))
+    tag = request.args.get('tag', None)
+    user = request.args.get('user', None)
 
     MAGIC_TWEET_START_TIMESTAMP = 1419090805 # Twitter tweet ID 546332554069282817 occurred at this timestamp
     MAGIC_TWEET_END_TIMESTAMP = 1417434398 # Twitter tweet ID 546332554069282817 occurred at this timestamp
@@ -319,13 +323,16 @@ def tweet_stream():
     # This parameter controls what real time corresponds to the start of the virtual time.
     # Reset this to the current unix epoch "reset the clock"
     # 1455161557 = 7:32pm PT, Wednesday February 10, 2016
-    WALL_TIME_ZERO = 1456765716
+    WALL_TIME_ZERO = int(os.getenv('TIMESTAMP_ZERO'))
 
     # Request the last TIME_WINDOW virtual seconds of tweets
     TIME_WINDOW = 30
 
-    virtual_time = time.time()
-    virtual_time += MAGIC_TWEET_START_TIMESTAMP - WALL_TIME_ZERO
+    # Later: These two (upper, lower) will be user-provided
+    virtual_time_upper = time.time()
+    virtual_time_upper += MAGIC_TWEET_START_TIMESTAMP - WALL_TIME_ZERO
+    virtual_time_lower = virtual_time_upper - TIME_WINDOW
+
     bot_user_ids = [bot.twitter_id for bot in TeamBot.query.all()]
 
     tweets = None
@@ -334,12 +341,18 @@ def tweet_stream():
     else:
         tweets = Tweet.query.filter(Tweet.user_id.in_(bot_user_ids))
 
-    tweets = tweets.filter(Tweet.timestamp < int(virtual_time))
-    tweets = tweets.filter(Tweet.timestamp >= int((virtual_time - TIME_WINDOW)))
+    tweets = tweets.filter(Tweet.timestamp < int(virtual_time_upper))
+    tweets = tweets.filter(Tweet.timestamp >= int(virtual_time_lower))
     tweets = tweets.order_by(Tweet.timestamp.desc())
     tweets = tweets.all()
 
-    return jsonify(tweets=[{'tweet_id': tweet.tweet_id, 'text': tweet.text} for tweet in tweets])
+    # todo: replace me with entity search
+    if tag is not None:
+        tweets = filter(lambda tweet: tweet.text.find("#"+tag) >= 0, tweets)
+    if user is not None:
+        tweets = filter(lambda tweet: tweet.text.find("@"+user) >= 0, tweets)
+
+    return jsonify(tweets=[{'tweet_id': tweet.tweet_id, 'text': tweet.text, 'entities': tweet.entities} for tweet in tweets])
 
 @app.route('/tracker')
 @requires_auth
