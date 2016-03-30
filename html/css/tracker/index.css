@@ -37,11 +37,41 @@
     list-style-type: none;
 }
 
-#leftpanel .nav .header .glyphicon-plus {
+#leftpanel .nav .header .glyphicon-plus-sign {
     float: right;
+    color: #aaa;
+}
+
+#leftpanel ul .glyphicon.glyphicon-remove {
+    float: right;
+    color: #aaa;
 }
 
 #leftpanel .nav.nav-loading .glyphicon-refresh {
     float: right;
     color: #bbb;
+}
+
+#leftpanel .banner {
+    font-style: italic;
+}
+
+#leftpanel .header {
+    text-transform: uppercase;
+}
+
+#leftpanel .entries form {
+    display: inline;
+}
+
+#leftpanel .entries input {
+    width: calc(100% - 20px);
+    background: #eee;
+    border: 0;
+    border-bottom: 1px solid #bbb;
+}
+
+#leftpanel .entries input:focus {
+    outline: none;
+    border-bottom-color: #CEA05C;
 }
