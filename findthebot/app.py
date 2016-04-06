@@ -53,6 +53,10 @@ DIFFICULTY_HARD = 'hard'
 
 # 2/5 bots
 USERS_HARD = [
+    5591048,
+    5591049,
+    5591050,
+
     5588759, # Fenvirantiviral
     5582774, # Random 1
     5586448, # SarahAndFam
@@ -62,6 +66,10 @@ USERS_HARD = [
 
 # 4/5 bots
 USERS_EASY = [
+    5591042, # gzf68920 (bot)
+    5591043, # gzf68920 (bot)
+    5591044, # gzf68920 (bot)
+
     5584555, # sonny_mkii (bot)
     4823361, # Daryl_V1 (bot)
     4817289, # HectorBigs (bot)
@@ -71,6 +79,10 @@ USERS_EASY = [
 
 # 3/5 bots
 USERS_MEDIUM = [
+    5591045,
+    5591046,
+    5591057,
+
     5590373, # cleanlivingmama (bot)
     5589464, # TannersDad (Not)
     5579275, # nursekayci (bot)
