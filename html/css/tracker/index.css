@@ -75,3 +75,10 @@
     outline: none;
     border-bottom-color: #CEA05C;
 }
+
+#leftpanel .glyphicon.glyphicon-pause,
+#leftpanel .glyphicon.glyphicon-play {
+    padding: 5px;
+    cursor: pointer;
+    color: white;
+}

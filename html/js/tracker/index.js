@@ -8,8 +8,25 @@ var Tweet = React.createClass({
 
 var Tracker = React.createClass({
     componentDidMount: function() {
+        if('localStorage' in window && window.localStorage['tags']) {
+            this.setState({
+                tags: JSON.parse(window.localStorage['tags'])
+            });
+        }
+
+        if('localStorage' in window && window.localStorage['users']) {
+            this.setState({
+                users: JSON.parse(window.localStorage['users'])
+            });
+        }
+
         window.setInterval(this._tick, 100);
         this._tick();
+    },
+
+    componentDidUpdate: function() {
+        window.localStorage['tags'] = JSON.stringify(this.state.tags);
+        window.localStorage['users'] = JSON.stringify(this.state.users);
     },
 
     getInitialState: function() {
@@ -24,12 +41,17 @@ var Tracker = React.createClass({
             pendingTag: '',
             pendingUser: '',
             editingTag: false,
-            editingUser: false
+            editingUser: false,
+            playing: true
         };
     },
     
     _tick: function() {
         if(this.state.ajaxXHR !== null) {
+            return;
+        }
+
+        if(!this.state.playing) {
             return;
         }
 
@@ -190,6 +212,12 @@ var Tracker = React.createClass({
         });
     },
 
+    handlePauseClick: function(e) {
+        this.setState({
+            playing: !this.state.playing
+        });
+    },
+
     render: function() {
         var tweets = [];
 
@@ -203,16 +231,21 @@ var Tracker = React.createClass({
             tweets.push(<p key={'loading'}>There are no tweets yet.</p>);
         }
 
-        var refresh = [];
         var tags = [], users = [];
 
         for(var i = 0; i < this.state.tags.length; i++) {
             var cls = "";
             if(this.state.activeTag === this.state.tags[i]) {
                 cls += "nav-active";
+                if(this.state.playing) {
+                    playpause = <span onClick={this.handlePauseClick} className="glyphicon glyphicon-pause"></span>;
+                } else {
+                    playpause = <span onClick={this.handlePauseClick} className="glyphicon glyphicon-play"></span>;
+                }
             }
 
             tags.push(<li key={i} data-tag={this.state.tags[i]} onClick={this.handleTagClick} className={cls}>
+                {playpause}
                 #{this.state.tags[i]}
                 <span onClick={this.handleTagRemoveClick.bind(this, i)} className="glyphicon glyphicon-remove"></span>
             </li>);
@@ -224,12 +257,18 @@ var Tracker = React.createClass({
         }
 
         for(var i = 0; i < this.state.users.length; i++) {
-            var cls = "";
+            var cls = "", playpause;
             if(this.state.activeUser === this.state.users[i]) {
                 cls += "nav-active";
+                if(this.state.playing) {
+                    playpause = <span onClick={this.handlePauseClick} className="glyphicon glyphicon-pause"></span>;
+                } else {
+                    playpause = <span onClick={this.handlePauseClick} className="glyphicon glyphicon-play"></span>;
+                }
             }
 
             users.push(<li key={i} data-user={this.state.users[i]} onClick={this.handleUserClick} className={cls}>
+                {playpause}
                 @{this.state.users[i]}
                 <span onClick={this.handleUserRemoveClick.bind(this, i)} className="glyphicon glyphicon-remove"></span>
             </li>);
@@ -249,15 +288,22 @@ var Tracker = React.createClass({
 
         var firehose_cls = "nav  nav-loading firehose";
 
+        var playpause_firehose = '';
+
         if(this.state.activeUser === null && this.state.activeTag === null) {
             firehose_cls += " nav-active";
+            if(this.state.playing) {
+                playpause_firehose = <span onClick={this.handlePauseClick} className="glyphicon glyphicon-pause"></span>;
+            } else {
+                playpause_firehose = <span onClick={this.handlePauseClick} className="glyphicon glyphicon-play"></span>;
+            }
         }
 
         return <div>
             <div id="leftpanel">
                 <div onClick={this.handleFirehoseClick} className={firehose_cls}>
+                    {playpause_firehose}
                     <span className="header">Firehose</span>
-                    {refresh}
                 </div>
 
                 <div className="nav tag">
