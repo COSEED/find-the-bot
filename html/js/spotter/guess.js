@@ -98,7 +98,15 @@ function HandleGuessResponse(response)
 function HandleGuessResponse_ClickHandler(response, currentIndex)
 {
     if(currentIndex == response.lessons.length) {
-        window.location = response.next;
+        if(response.lessons.length > 0) {
+            // Got to the end; next press is transition
+            window.location = response.next;
+        } else {
+            // Just make the next press the transition
+            $('.guess-footer a.btn').one('click', function() { 
+                window.location = response.next;
+            });
+        }
     } else {
         var target;
         $('.guess-footer a.btn').one('click', function() { 
@@ -109,6 +117,7 @@ function HandleGuessResponse_ClickHandler(response, currentIndex)
 
             HandleGuessResponse_ClickHandler(response, currentIndex + 1); 
         });
+
         target = ShowLesson(response.lessons[currentIndex]);
         
         if(!target.$target.is(":in-viewport")) {
