@@ -1,9 +1,62 @@
 var Tweet = React.createClass({
     render: function() {
         return <div className="tweet">
-            <p><img src={this.props.user.profile_image_url} /></p>
+            <p className="profile-img"><img src={this.props.user.profile_image_url} /></p>
+            <p className="userinfo">
+                <span>{this.props.user.full_name}</span>
+                <span>{this.props.user.screen_name}</span>
+            </p>
             <p dangerouslySetInnerHTML={{__html: this.props.tweet.text}} />
             <button onClick={this.props.markAsBot} className="mark-as-bot">Mark user as bot</button>
+        </div>;
+    }
+});
+
+var Profile = React.createClass({
+    render: function() {
+        return <div>
+            <div className="top">
+                <span className="profile-photo"><img src="/static/img/egg-blue.jpg" /></span>
+                <h1>LIL B THE BASED BOT</h1>
+                <h2>@lilbthebasedbot</h2>
+                <p className="bio">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut at dignissim quam. Maecenas ut pellentesque tortor. Nulla at lectus dapibus, laoreet sapien nec, pellentesque odio. Nunc tincidunt fringilla convallis. Morbi vel turpis vel neque lacinia volutpat. Fusce nisi velit, pellentesque eget gravida nec, iaculis vel tellus. Cras efficitur erat turpis, at cursus leo elementum ac. Quisque aliquet justo id odio dignissim, nec pretium mauris fringilla. Curabitur in ligula quis mauris imperdiet blandit vel et enim. Sed at pellentesque purus. Cras bibendum sed ipsum sit amet porta. Aliquam eget quam sed mi sagittis tincidunt sed at nulla.</p>
+                <button className="mark-as-bot">Mark user as bot</button>
+            </div>
+            <div className="info">
+                <ul className="short">
+                    <li>
+                        <span className="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+                        United States
+                    </li>
+                    <li>
+                        <span className="glyphicon glyphicon-link" aria-hidden="true"></span>
+                        lilbthebasedbot.com
+                    </li>
+                    <li>
+                        <span className="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+                        Joined May 2009
+                    </li>
+                </ul>
+
+                <ul className="statistics">
+                    <li>
+                        <label>Tweets</label>
+                        149K
+                    </li>
+                    <li>
+                        <label>Following</label>
+                        1.3M
+                    </li>
+                    <li>
+                        <label>Followers</label>
+                        1.21M
+                    </li>
+                    <li>
+                        <label>Likes</label>
+                        97.6K
+                    </li>
+                </ul>
+            </div>
         </div>;
     }
 });
@@ -20,6 +73,24 @@ var Tracker = React.createClass({
             this.setState({
                 users: JSON.parse(window.localStorage['users'])
             });
+        }
+
+        if(window.location.hash) {
+            var userRegex = /user(.+)/;
+            var tagRegex = /hash(.+)/;
+
+            var userResult = userRegex.exec(window.location.hash),
+                tagResult = tagRegex.exec(window.location.hash);
+
+            if(userResult) {
+                this.setState({
+                    activeUser: userResult[1]
+                });
+            } else if(tagResult) {
+                this.setState({
+                    activeTag: tagResult[1]
+                });
+            }
         }
 
         window.setInterval(this._tick, 100);
@@ -84,6 +155,8 @@ var Tracker = React.createClass({
             activeTag: null,
             activeUser: null
         });
+
+        window.location.hash = "";
     },
 
     handleTagClick: function(e) {
@@ -93,6 +166,8 @@ var Tracker = React.createClass({
             activeTag: hashtag,
             activeUser: null
         });
+
+        window.location.hash = "hash"+hashtag;
     },
 
     handleUserClick: function(e) {
@@ -102,6 +177,8 @@ var Tracker = React.createClass({
             activeTag: null,
             activeUser: user
         });
+
+        window.location.hash = "user"+user;
     },
 
     handleUserRemoveClick: function(i, e) {
@@ -307,6 +384,12 @@ var Tracker = React.createClass({
             }
         }
 
+        var profile_panel = '';
+
+        if(this.state.activeUser !== null) {
+            profile_panel = <Profile />;
+        }
+
         return <div>
             <div id="leftpanel">
                 <div onClick={this.handleFirehoseClick} className={firehose_cls}>
@@ -335,7 +418,12 @@ var Tracker = React.createClass({
                 </div>
             </div>
             <div id="mainpanel">
-                {tweets}
+                <div id="profilepanel">
+                    {profile_panel}
+                </div>
+                <div id="tweets">
+                    {tweets}
+                </div>
             </div>
         </div>;
     }

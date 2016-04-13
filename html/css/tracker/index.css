@@ -147,3 +147,22 @@
     display: block;
 }
 
+#profilepanel .top .profile-photo {
+    width: 150px;
+    height: 150px;
+    display: inline-block;
+    margin-right: 30px;
+}
+
+#profilepanel .top .profile-photo img {
+    max-width: 150px;
+    max-height: 150px;
+    float: left;
+}
+
+#profilepanel .top h1,
+#profilepanel .top h2
+{
+    display: inline-block;
+    vertical-align: top;
+}

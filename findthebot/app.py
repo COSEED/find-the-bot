@@ -11,6 +11,8 @@ from flask.json import jsonify
 
 from sqlalchemy import func 
 
+from marshmallow import Schema, fields, ValidationError, pre_load
+
 import psycopg2
 
 app = Flask(__name__)
@@ -149,6 +151,24 @@ class Tuser(db.Model):
     def get_profile_url_fullsize(self):
         return self.profile_image_url.replace("_normal", "")
 
+class TuserSchema(Schema):
+    id = fields.Int()
+    timestamp = fields.Int()
+    user_id = fields.Str()
+    screen_name = fields.Str()
+    full_name = fields.Str()
+    bio = fields.Str()
+    followers = fields.Int()
+    following = fields.Int()
+    total_tweets = fields.Int()
+    interesting = fields.Boolean()
+    location = fields.Str()
+    website = fields.Str()
+    profile_image_url = fields.Str()
+    profile_banner_url = fields.Str()
+    protected = fields.Boolean()
+tuser_schema = TuserSchema()
+
 class Tweet(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     tweet_id = db.Column(db.BigInteger)
@@ -166,6 +186,11 @@ class Tweet(db.Model):
 
     def get_friendly_datetime(self):
         return time.strftime("%d %b, %I:%M%p", time.gmtime(self.timestamp))
+
+class TweetSchema(Schema):
+    id = fields.Int(load_from='tweet_id')
+    text = fields.Str()
+tweet_schema = TweetSchema()
 
 class TeamBot(db.Model):
     __tablename__ = "team_bot"
@@ -366,7 +391,9 @@ def tweet_stream():
     if user is not None:
         tweets = filter(lambda tweet: tweet.text.find("@"+user) >= 0, tweets)
 
-    return jsonify(tweets=[{'tweet': {'tweet_id': tweet.tweet_id, 'text': tweet.text}, 'entities': tweet.entities, 'user': {'screen_name': 'foobar', 'user_id': 1, 'profile_image_url': '/static/img/egg-blue.jpg'}} for tweet in tweets])
+    tuser = Tuser.query.filter(Tuser.id == 5584555).one()
+
+    return jsonify(tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'entities': tweet.entities, 'user': tuser_schema.dump(tuser)[0]} for tweet in tweets])
 
 @app.route('/tracker')
 @requires_auth

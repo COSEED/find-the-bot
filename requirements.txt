@@ -5,3 +5,4 @@ flask-migrate == 1.6.0
 flask-alembic == 1.2.1
 pytest == 2.8.2
 Flask-Profile == 0.1
+marshmallow == 2.7.1
