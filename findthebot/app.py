@@ -81,7 +81,7 @@ USERS_EASY = [
 USERS_MEDIUM = [
     5591045,
     5591046,
-    5591057,
+    5591047,
 
     5590373, # cleanlivingmama (bot)
     5589464, # TannersDad (Not)
