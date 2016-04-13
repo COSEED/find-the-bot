@@ -1,7 +1,9 @@
 var Tweet = React.createClass({
     render: function() {
         return <div className="tweet">
+            <p><img src={this.props.user.profile_image_url} /></p>
             <p dangerouslySetInnerHTML={{__html: this.props.tweet.text}} />
+            <button onClick={this.props.markAsBot} className="mark-as-bot">Mark user as bot</button>
         </div>;
     }
 });
@@ -218,11 +220,17 @@ var Tracker = React.createClass({
         });
     },
 
+    handleMarkAsBotClicked: function(tweet_id, user_id, e) {
+        console.log("Marking user ", user_id, " as a bot via tweet ", tweet_id);
+        e.preventDefault();
+    },
+
     render: function() {
         var tweets = [];
 
         for(var i = 0; i < this.state.tweets.length; i++) {
-            tweets.push(<Tweet key={this.state.tweets[i].tweet_id} tweet={this.state.tweets[i]} />);
+            var markasbot = this.handleMarkAsBotClicked.bind(this, this.state.tweets[i].tweet.tweet_id, this.state.tweets[i].user.user_id);
+            tweets.push(<Tweet markAsBot={markasbot} key={this.state.tweets[i].tweet.tweet_id} user={this.state.tweets[i].user} tweet={this.state.tweets[i].tweet} />);
         }
 
         if(tweets.length == 0 && this.state.loading) {
@@ -244,7 +252,7 @@ var Tracker = React.createClass({
                 }
             }
 
-            tags.push(<li key={i} data-tag={this.state.tags[i]} onClick={this.handleTagClick} className={cls}>
+            tags.push(<li key={'tag-'+i} data-tag={this.state.tags[i]} onClick={this.handleTagClick} className={cls}>
                 {playpause}
                 #{this.state.tags[i]}
                 <span onClick={this.handleTagRemoveClick.bind(this, i)} className="glyphicon glyphicon-remove"></span>
@@ -267,7 +275,7 @@ var Tracker = React.createClass({
                 }
             }
 
-            users.push(<li key={i} data-user={this.state.users[i]} onClick={this.handleUserClick} className={cls}>
+            users.push(<li key={'user-'+i} data-user={this.state.users[i]} onClick={this.handleUserClick} className={cls}>
                 {playpause}
                 @{this.state.users[i]}
                 <span onClick={this.handleUserRemoveClick.bind(this, i)} className="glyphicon glyphicon-remove"></span>

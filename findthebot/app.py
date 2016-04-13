@@ -9,6 +9,8 @@ from flask import Flask, redirect, render_template, request, Response
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.json import jsonify
 
+from sqlalchemy import func 
+
 import psycopg2
 
 app = Flask(__name__)
@@ -160,6 +162,7 @@ class Tweet(db.Model):
     db.Index('tweet_by_timestamp', timestamp)
 
     entities = db.relationship('TweetEntity', lazy='joined')
+    #tuser = db.relationship('Tuser', lazy='joined', primaryjoin="and_(foreign(Tuser.user_id)==Tweet.user_id)", order_by="Tuser.timestamp.desc()")
 
     def get_friendly_datetime(self):
         return time.strftime("%d %b, %I:%M%p", time.gmtime(self.timestamp))
@@ -355,7 +358,6 @@ def tweet_stream():
 
     tweets = tweets.filter(Tweet.timestamp < int(virtual_time_upper))
     tweets = tweets.filter(Tweet.timestamp >= int(virtual_time_lower))
-    tweets = tweets.order_by(Tweet.timestamp.desc())
     tweets = tweets.all()
 
     # todo: replace me with entity search
@@ -364,7 +366,7 @@ def tweet_stream():
     if user is not None:
         tweets = filter(lambda tweet: tweet.text.find("@"+user) >= 0, tweets)
 
-    return jsonify(tweets=[{'tweet_id': tweet.tweet_id, 'text': tweet.text, 'entities': tweet.entities} for tweet in tweets])
+    return jsonify(tweets=[{'tweet': {'tweet_id': tweet.tweet_id, 'text': tweet.text}, 'entities': tweet.entities, 'user': {'screen_name': 'foobar', 'user_id': 1, 'profile_image_url': '/static/img/egg-blue.jpg'}} for tweet in tweets])
 
 @app.route('/tracker')
 @requires_auth
