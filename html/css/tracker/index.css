@@ -33,6 +33,10 @@
     color: #eee;
 }
 
+#leftpanel .nav .entries {
+    margin-top: 15px;
+}
+
 #leftpanel .nav li {
     list-style-type: none;
 }

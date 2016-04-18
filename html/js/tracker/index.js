@@ -13,47 +13,68 @@ var Tweet = React.createClass({
 });
 
 var Profile = React.createClass({
+    getInitialState: function() {
+        return {
+            loading: true,
+            user: null
+        };
+    },
+
+    handleProfile: function(response) {
+        this.setState({
+            loading: false,
+            user: response.tuser
+        });
+    },
+
+    componentDidMount: function() {
+        $.ajax({
+            url: '/profile',
+            method: 'GET',
+            data: {
+                screen_name: this.props.screen_name
+            },
+            success: this.handleProfile
+        });
+    },
+
     render: function() {
+        if(this.state.loading) {
+            return <div />;
+        }
+
         return <div>
             <div className="top">
-                <span className="profile-photo"><img src="/static/img/egg-blue.jpg" /></span>
-                <h1>LIL B THE BASED BOT</h1>
-                <h2>@lilbthebasedbot</h2>
-                <p className="bio">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut at dignissim quam. Maecenas ut pellentesque tortor. Nulla at lectus dapibus, laoreet sapien nec, pellentesque odio. Nunc tincidunt fringilla convallis. Morbi vel turpis vel neque lacinia volutpat. Fusce nisi velit, pellentesque eget gravida nec, iaculis vel tellus. Cras efficitur erat turpis, at cursus leo elementum ac. Quisque aliquet justo id odio dignissim, nec pretium mauris fringilla. Curabitur in ligula quis mauris imperdiet blandit vel et enim. Sed at pellentesque purus. Cras bibendum sed ipsum sit amet porta. Aliquam eget quam sed mi sagittis tincidunt sed at nulla.</p>
+                <span className="profile-photo"><img src={this.state.user.profile_image_url} /></span>
+                <h1>{this.state.user.full_name}</h1>
+                <h2>@{this.state.user.screen_name}</h2>
+                <p className="bio">{this.state.user.bio}</p>
                 <button className="mark-as-bot">Mark user as bot</button>
             </div>
             <div className="info">
                 <ul className="short">
                     <li>
                         <span className="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
-                        United States
+                        {this.state.user.location}
                     </li>
                     <li>
                         <span className="glyphicon glyphicon-link" aria-hidden="true"></span>
-                        lilbthebasedbot.com
-                    </li>
-                    <li>
-                        <span className="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
-                        Joined May 2009
+                        {this.state.user.website}
                     </li>
                 </ul>
 
                 <ul className="statistics">
                     <li>
                         <label>Tweets</label>
-                        149K
+                        {this.state.user.total_tweets}
                     </li>
                     <li>
                         <label>Following</label>
-                        1.3M
+                        {this.state.user.following}
                     </li>
                     <li>
                         <label>Followers</label>
-                        1.21M
-                    </li>
-                    <li>
-                        <label>Likes</label>
-                        97.6K
+                        {this.state.user.followers}
                     </li>
                 </ul>
             </div>
@@ -393,7 +414,7 @@ var Tracker = React.createClass({
         var profile_panel = '';
 
         if(this.state.activeUser !== null) {
-            profile_panel = <Profile />;
+            profile_panel = <Profile screen_name={this.state.activeUser} />;
         }
 
         return <div>

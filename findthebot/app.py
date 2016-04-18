@@ -343,6 +343,13 @@ def test_showguess(test_id, guess_id):
 
     return render_template("test_guess.html", guess_id=int(guess_id), test=test, tuser=tuser, tweets=tweets, is_bot=tuser_is_bot)
 
+@app.route('/profile')
+@requires_auth
+def tweet_stream_profile():
+    screen_name = request.args.get('screen_name')
+    tuser = Tuser.query.filter(Tuser.screen_name == screen_name).first()
+    return jsonify(tuser=tuser_schema.dump(tuser)[0])
+
 @app.route('/stream')
 @requires_auth
 def tweet_stream():
