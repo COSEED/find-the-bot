@@ -94,6 +94,19 @@
     color: white;
 }
 
+.tweet .profile-img {
+    float: left;
+}
+
+.tweet .userinfo {
+    display: block;
+}
+
+.tweet .userinfo .fullname {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
 .tweet img {
     width: 35px;
     margin-right: 25px;

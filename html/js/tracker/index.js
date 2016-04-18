@@ -3,8 +3,8 @@ var Tweet = React.createClass({
         return <div className="tweet">
             <p className="profile-img"><img src={this.props.user.profile_image_url} /></p>
             <p className="userinfo">
-                <span>{this.props.user.full_name}</span>
-                <span>{this.props.user.screen_name}</span>
+                <span className="fullname">{this.props.user.full_name}</span>
+                <span className="screenname">@{this.props.user.screen_name}</span>
             </p>
             <p dangerouslySetInnerHTML={{__html: this.props.tweet.text}} />
             <button onClick={this.props.markAsBot} className="mark-as-bot">Mark user as bot</button>
@@ -93,7 +93,7 @@ var Tracker = React.createClass({
             }
         }
 
-        window.setInterval(this._tick, 100);
+        window.setInterval(this._tick, 250);
         this._tick();
     },
 
@@ -134,7 +134,13 @@ var Tracker = React.createClass({
                 tag: this.state.activeTag,
                 user: this.state.activeUser
             },
-            success: this._updateStream
+            success: this._updateStream,
+            error: function() {
+                this.setState({ 
+                    ajaxXHR: null
+                });
+            }.bind(this),
+            timeout: 1000
         });
 
         this.setState({
@@ -307,7 +313,7 @@ var Tracker = React.createClass({
 
         for(var i = 0; i < this.state.tweets.length; i++) {
             var markasbot = this.handleMarkAsBotClicked.bind(this, this.state.tweets[i].tweet.tweet_id, this.state.tweets[i].user.user_id);
-            tweets.push(<Tweet markAsBot={markasbot} key={this.state.tweets[i].tweet.tweet_id} user={this.state.tweets[i].user} tweet={this.state.tweets[i].tweet} />);
+            tweets.push(<Tweet markAsBot={markasbot} key={this.state.tweets[i].tweet.id} user={this.state.tweets[i].user} tweet={this.state.tweets[i].tweet} />);
         }
 
         if(tweets.length == 0 && this.state.loading) {

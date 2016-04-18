@@ -383,6 +383,7 @@ def tweet_stream():
 
     tweets = tweets.filter(Tweet.timestamp < int(virtual_time_upper))
     tweets = tweets.filter(Tweet.timestamp >= int(virtual_time_lower))
+    tweets = tweets.order_by(Tweet.timestamp.desc())
     tweets = tweets.all()
 
     # todo: replace me with entity search
@@ -391,9 +392,13 @@ def tweet_stream():
     if user is not None:
         tweets = filter(lambda tweet: tweet.text.find("@"+user) >= 0, tweets)
 
-    tuser = Tuser.query.filter(Tuser.id == 5584555).one()
+    tusers = {}
+    tusers_to_fetch = []
+    for tweet in tweets:
+        tuser = Tuser.query.filter(Tuser.user_id == tweet.user_id).first()
+        tweet.tuser = tuser
 
-    return jsonify(tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'entities': tweet.entities, 'user': tuser_schema.dump(tuser)[0]} for tweet in tweets])
+    return jsonify(tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'entities': tweet.entities, 'user': tuser_schema.dump(tweet.tuser)[0]} for tweet in tweets])
 
 @app.route('/tracker')
 @requires_auth
