@@ -22,12 +22,14 @@
     z-index: 4;
 }
 
-.guess-header .btn-default {
+.guess-header .btn-default,
+.guess-footer .btn-default {
     color: white;
     background: black;
 }
 
-.guess-header .btn-default:active {
+.guess-header .btn-default:active,
+.guess-footer .btn-default:active {
     color: white;
     background: #888;
 }
@@ -44,7 +46,6 @@
     position: fixed;
     bottom: 0;
     width: 100%;
-    height: 65px;
     background-color: #bbb;
     text-align: center;
     padding: 10px;
