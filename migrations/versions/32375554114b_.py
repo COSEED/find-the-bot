@@ -1,4 +1,4 @@
-"""empty message
+"""Create index tweet_by_timestamp
 
 Revision ID: 32375554114b
 Revises: 4b0e812d4942

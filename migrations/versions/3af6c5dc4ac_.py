@@ -1,4 +1,4 @@
-"""empty message
+"""Add tuser_tuser timestamp
 
 Revision ID: 3af6c5dc4ac
 Revises: 32375554114b
