@@ -185,7 +185,7 @@ class Tweet(db.Model):
     #tuser = db.relationship('Tuser', lazy='joined', primaryjoin="and_(foreign(Tuser.user_id)==Tweet.user_id)", order_by="Tuser.timestamp.desc()")
 
     def get_friendly_datetime(self):
-        return time.strftime("%d %b, %I:%M%p", time.gmtime(self.timestamp))
+        return time.strftime("%d %b %Y &middot; %I:%M %p", time.gmtime(self.timestamp))
 
 class TweetSchema(Schema):
     id = fields.Int(load_from='tweet_id')
