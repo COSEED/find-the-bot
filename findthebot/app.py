@@ -362,7 +362,8 @@ def test_showguess(team_id, test_id, guess_id):
 def tweet_stream_profile(team_id):
     screen_name = request.args.get('screen_name')
     tuser = Tuser.query.filter(Tuser.screen_name == screen_name).first()
-    return jsonify(tuser=tuser_schema.dump(tuser)[0])
+    marked = GuessTuser.query.filter(GuessTuser.team_id == team_id, GuessTuser.tuser_id == tuser.id).count()
+    return jsonify(tuser=tuser_schema.dump(tuser)[0], marked=bool(marked))
 
 @app.route('/stream')
 @requires_auth

@@ -24,7 +24,8 @@ var Profile = React.createClass({
     handleProfile: function(response) {
         this.setState({
             loading: false,
-            user: response.tuser
+            user: response.tuser,
+            marked: response.marked
         });
     },
 
