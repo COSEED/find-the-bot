@@ -237,6 +237,35 @@ class TweetEdge(db.Model):
     weight = db.Column(db.Integer)
     timestamp = db.Column(db.Integer)
 
+class Team(db.Model):
+    __tablename__ = "team"
+
+    id = db.Column(db.Integer, primary_key=True)
+    team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+    timestamp = db.Column(db.Integer)
+
+class Guess(db.Model):
+    __tablename__ = "guess"
+
+    id = db.Column(db.Integer, primary_key=True)
+    team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+    timestamp = db.Column(db.Integer)
+
+    team = db.relationship('Team', lazy='joined')
+
+    db.Index('guess_by_team_id', team_id)
+
+class GuessTuser(db.Model):
+    __tablename__ = "guess_tuser"
+
+    id = db.Column(db.Integer, primary_key=True)
+    guess_id = db.Column(db.Integer, db.ForeignKey('guess.id'))
+    tuser_id = db.Column(db.Integer, db.ForeignKey('tuser.id'))
+
+    tuser = db.relationship('Tuser', lazy='joined')
+
+    db.Index('guess_tuser_by_guess_id', guess_id)
+
 def find_results(bots, test):
     '''Given a set of bots and a test which is a set of selections (that may or may not be bots) and a set of guesses, 
     compute the number of correct and incorrect guesses.'''
