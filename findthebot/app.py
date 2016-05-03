@@ -22,17 +22,8 @@ debug = os.getenv('DEBUG') is not None
 if os.getenv('DATABASE_URL') is None:
     raise ValueError('Missing DATABASE_URL')
 
-if os.getenv('PASSWORD') is None:
-    raise ValueError('Missing PASSWORD')
-
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_ECHO'] = debug
-
-def check_auth(username, password):
-    """This function is called to check if a username /
-    password combination is valid.
-    """
-    return password == os.getenv('PASSWORD')
 
 def authenticate():
     """Sends a 401 response that enables basic auth"""
@@ -44,8 +35,12 @@ def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
+        if not auth:
             return authenticate()
+        team = Team.query.filter(Team.password == auth.password).first()
+        if not team:
+            return authenticate()
+        kwargs['team_id'] = team.id
         return f(*args, **kwargs)
     return decorated
 
@@ -241,30 +236,20 @@ class Team(db.Model):
     __tablename__ = "team"
 
     id = db.Column(db.Integer, primary_key=True)
-    team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+    password = db.Column(db.String(255))
     timestamp = db.Column(db.Integer)
-
-class Guess(db.Model):
-    __tablename__ = "guess"
-
-    id = db.Column(db.Integer, primary_key=True)
-    team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
-    timestamp = db.Column(db.Integer)
-
-    team = db.relationship('Team', lazy='joined')
-
-    db.Index('guess_by_team_id', team_id)
 
 class GuessTuser(db.Model):
-    __tablename__ = "guess_tuser"
+    __tablename__ = "team_tuser"
 
     id = db.Column(db.Integer, primary_key=True)
-    guess_id = db.Column(db.Integer, db.ForeignKey('guess.id'))
+    timestamp = db.Column(db.Integer)
+    team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
     tuser_id = db.Column(db.Integer, db.ForeignKey('tuser.id'))
 
     tuser = db.relationship('Tuser', lazy='joined')
 
-    db.Index('guess_tuser_by_guess_id', guess_id)
+    db.Index('team_tuser_by_team_id', team_id)
 
 def find_results(bots, test):
     '''Given a set of bots and a test which is a set of selections (that may or may not be bots) and a set of guesses, 
@@ -292,12 +277,12 @@ def find_results(bots, test):
 
 @app.route('/')
 @requires_auth
-def index():
+def index(team_id):
     return render_template("index.html")
 
 @app.route('/test/new', methods=['POST'])
 @requires_auth
-def test_new():
+def test_new(team_id):
     test = Test()
     db.session.add(test)
     db.session.commit()
@@ -314,7 +299,7 @@ def test_new():
 
 @app.route('/test/<test_id>/complete')
 @requires_auth
-def test_done(test_id):
+def test_done(team_id, test_id):
     test = Test.query.filter(Test.id == test_id).first()
     bots = TeamBot.query.all()
     bots_userids = set([str(bot.twitter_id) for bot in bots])
@@ -325,7 +310,7 @@ def test_done(test_id):
 
 @app.route('/test/<test_id>/guess', methods=['POST'])
 @requires_auth
-def test_makeguess(test_id):
+def test_makeguess(team_id, test_id):
     user_id = request.form["tuser_id"]
     guess_is_bot = request.form["guess_is_bot"] == "1"
 
@@ -359,7 +344,7 @@ def test_makeguess(test_id):
 
 @app.route('/test/<test_id>/<guess_id>')
 @requires_auth
-def test_showguess(test_id, guess_id):
+def test_showguess(team_id, test_id, guess_id):
     test = Test.query.filter(Test.id == test_id).first()
 
     if int(guess_id) >= len(test.selections):
@@ -374,14 +359,14 @@ def test_showguess(test_id, guess_id):
 
 @app.route('/profile')
 @requires_auth
-def tweet_stream_profile():
+def tweet_stream_profile(team_id):
     screen_name = request.args.get('screen_name')
     tuser = Tuser.query.filter(Tuser.screen_name == screen_name).first()
     return jsonify(tuser=tuser_schema.dump(tuser)[0])
 
 @app.route('/stream')
 @requires_auth
-def tweet_stream():
+def tweet_stream(team_id):
 
     FRACTION_BOT_TWEETS = 1
     FRACTION_NOISE_TWEETS = 0.01
@@ -438,8 +423,19 @@ def tweet_stream():
 
 @app.route('/tracker')
 @requires_auth
-def tracker():
+def tracker(team_id):
     return render_template("tracker.html")
+
+@app.route('/tracker/guess', methods=['POST'])
+@requires_auth
+def tracker_guess(team_id):
+    
+    tuser_id = int(request.form["tuser_id"])
+    guess = GuessTuser(timestamp=int(time.time()) , team_id=team_id, tuser_id=tuser_id)
+    db.session.add(guess)
+    db.session.commit()
+    
+    return None
 
 if __name__ == "__main__":
     app.run(debug=debug, host='0.0.0.0', port=int(os.getenv("PORT")))

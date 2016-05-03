@@ -16,6 +16,7 @@ var Profile = React.createClass({
     getInitialState: function() {
         return {
             loading: true,
+            marked: false,
             user: null
         };
     },
@@ -24,6 +25,25 @@ var Profile = React.createClass({
         this.setState({
             loading: false,
             user: response.tuser
+        });
+    },
+
+    _handleMarkBotSuccess: function() {
+        this.setState({
+            marked: true
+        });
+    },
+
+    handleClickMarkAsBot: function() {
+        var tuser_id = this.state.user.id;
+
+        $.ajax({
+            url: '/tracker/guess',
+            method: 'POST',
+            data: {
+                tuser_id: tuser_id
+            },
+            success: this._handleMarkBotSuccess
         });
     },
 
@@ -42,6 +62,14 @@ var Profile = React.createClass({
         if(this.state.loading) {
             return <div />;
         }
+        
+        var markBtn;
+        
+        if(!this.state.marked) {
+            markBtn = <button onClick={this.handleClickMarkAsBot} className="mark-as-bot">Mark user as bot</button>;
+        } else {
+            markBtn = <button onClick={this.handleClickUnmarkAsBot} className="mark-as-bot unmark">Unmark user as bot</button>;
+        }
 
         return <div>
             <div className="top">
@@ -49,7 +77,7 @@ var Profile = React.createClass({
                 <h1>{this.state.user.full_name}</h1>
                 <h2>@{this.state.user.screen_name}</h2>
                 <p className="bio">{this.state.user.bio}</p>
-                <button className="mark-as-bot">Mark user as bot</button>
+                {markBtn}
             </div>
             <div className="info">
                 <ul className="short">
