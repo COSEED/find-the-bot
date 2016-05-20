@@ -436,7 +436,17 @@ def tracker_guess(team_id):
     db.session.add(guess)
     db.session.commit()
     
-    return None
+    return ""
+
+@app.route('/tracker/unguess', methods=['POST'])
+@requires_auth
+def tracker_unguess(team_id):
+    
+    tuser_id = int(request.form["tuser_id"])
+    GuessTuser.query.filter(GuessTuser.team_id==team_id, GuessTuser.tuser_id == tuser_id).delete()
+    db.session.commit()
+    
+    return ""
 
 if __name__ == "__main__":
     app.run(debug=debug, host='0.0.0.0', port=int(os.getenv("PORT")))

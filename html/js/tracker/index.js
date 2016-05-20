@@ -29,9 +29,9 @@ var Profile = React.createClass({
         });
     },
 
-    _handleMarkBotSuccess: function() {
+    _handleMarkBot: function(marked) {
         this.setState({
-            marked: true
+            marked: marked
         });
     },
 
@@ -44,7 +44,20 @@ var Profile = React.createClass({
             data: {
                 tuser_id: tuser_id
             },
-            success: this._handleMarkBotSuccess
+            success: this._handleMarkBot.bind(this, true)
+        });
+    },
+
+    handleClickUnmarkAsBot: function() {
+        var tuser_id = this.state.user.id;
+
+        $.ajax({
+            url: '/tracker/unguess',
+            method: 'POST',
+            data: {
+                tuser_id: tuser_id
+            },
+            success: this._handleMarkBot.bind(this, false)
         });
     },
 
