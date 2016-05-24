@@ -1,13 +1,16 @@
 var Tweet = React.createClass({
+    handleClick: function(e) {
+        this.props.handleClickedUsernameEvent(e);
+    },
+
     render: function() {
         return <div className="tweet">
             <p className="profile-img"><img src={this.props.user.profile_image_url} /></p>
-            <p className="userinfo">
+            <p className="userinfo" onClick={this.handleClick}>
                 <span className="fullname">{this.props.user.full_name}</span>
                 <span className="screenname">@{this.props.user.screen_name}</span>
             </p>
             <p dangerouslySetInnerHTML={{__html: this.props.tweet.text}} />
-            <button onClick={this.props.markAsBot} className="mark-as-bot">Mark user as bot</button>
         </div>;
     }
 });
@@ -239,6 +242,26 @@ var Tracker = React.createClass({
         window.location.hash = "hash"+hashtag;
     },
 
+    handleClickedUsername: function(tweetdata, e) {
+        e.preventDefault();
+        this.setState({
+            activeTag: null,
+            activeUser: tweetdata.user.screen_name
+        });
+        var users = [tweetdata.user.screen_name];
+        for(var i = 0; i < this.state.users.length; i++) {
+            if(this.state.users[i] == tweetdata.user.screen_name) {
+                return;
+            }
+
+            users.push(this.state.users[i]);
+        }
+        this.setState({
+            users: users
+        });
+        window.location.hash = "user"+tweetdata.user.screen_name;
+    },
+
     handleUserClick: function(e) {
         var user = $(e.target).closest('li').attr('data-user');
 
@@ -366,8 +389,7 @@ var Tracker = React.createClass({
         });
     },
 
-    handleMarkAsBotClicked: function(tweet_id, user_id, e) {
-        console.log("Marking user ", user_id, " as a bot via tweet ", tweet_id);
+    handleMarkAsBotClicked: function(user_id, e) {
         e.preventDefault();
     },
 
@@ -375,8 +397,9 @@ var Tracker = React.createClass({
         var tweets = [];
 
         for(var i = 0; i < this.state.tweets.length; i++) {
-            var markasbot = this.handleMarkAsBotClicked.bind(this, this.state.tweets[i].tweet.tweet_id, this.state.tweets[i].user.user_id);
-            tweets.push(<Tweet markAsBot={markasbot} key={this.state.tweets[i].tweet.id} user={this.state.tweets[i].user} tweet={this.state.tweets[i].tweet} />);
+            var tweetdata = this.state.tweets[i];
+            var handleClickedUsername = this.handleClickedUsername.bind(this, tweetdata);
+            tweets.push(<Tweet handleClickedUsernameEvent={handleClickedUsername} key={tweetdata.tweet.id} user={tweetdata.user} tweet={tweetdata.tweet} />);
         }
 
         if(tweets.length == 0 && this.state.loading) {

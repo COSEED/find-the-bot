@@ -98,8 +98,35 @@
     color: white;
 }
 
+.tweet {
+    padding: 15px 15px 15px 75px;
+    margin: 0;
+    position: relative;
+}
+
+.tweet:hover {
+    background: #F0F0F0;
+}
+.tweet:hover .userinfo .screenname {
+    text-decoration: underline;
+    cursor: pointer;
+}
+.tweet:hover .profile-img {
+    cursor: pointer;
+    border: 1px solid white;
+    outline: 1px solid black;
+    width: 37px;
+    height: 37px;
+    top: calc(50% - (37px / 2));
+    left: 14px;
+}
+
 .tweet .profile-img {
-    float: left;
+    position: absolute;
+    top: calc(50% - (35px / 2));
+    left: 15px;
+    width: 35px;
+    height: 35px;
 }
 
 .tweet .userinfo {
@@ -119,33 +146,6 @@
 .tweet p {
     display: inline-block;
     margin: 0;
-}
-
-.tweet:hover {
-    background: #F0F0F0;
-    cursor: pointer;
-}
-
-.tweet {
-    padding: 15px;
-    margin: 0;
-    position: relative;
-}
-
-.tweet:before {
-    content: " ";
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #888;
-    opacity: 0.8;
-    display: none;
-}
-
-.tweet:hover:before {
-    display: block;
 }
 
 .tweet button.mark-as-bot {
