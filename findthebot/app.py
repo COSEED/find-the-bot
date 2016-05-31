@@ -2,6 +2,7 @@ import os
 import time
 
 import logging
+import re
 
 from functools import wraps
 
@@ -176,7 +177,7 @@ class Tweet(db.Model):
     db.Index('tweet_by_user_id_by_time', user_id, timestamp)
     db.Index('tweet_by_timestamp', timestamp)
 
-    entities = db.relationship('TweetEntity', lazy='joined')
+    #entities = db.relationship('TweetEntity', lazy='joined')
     #tuser = db.relationship('Tuser', lazy='joined', primaryjoin="and_(foreign(Tuser.user_id)==Tweet.user_id)", order_by="Tuser.timestamp.desc()")
 
     def get_friendly_datetime(self):
@@ -416,11 +417,12 @@ def tweet_stream(team_id):
 
     tusers = {}
     tusers_to_fetch = []
+
     for tweet in tweets:
         tuser = Tuser.query.filter(Tuser.user_id == tweet.user_id).first()
         tweet.tuser = tuser
 
-    return jsonify(tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'entities': tweet.entities, 'user': tuser_schema.dump(tweet.tuser)[0]} for tweet in tweets])
+    return jsonify(tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'user': tuser_schema.dump(tweet.tuser)[0]} for tweet in tweets])
 
 @app.route('/tracker')
 @requires_auth

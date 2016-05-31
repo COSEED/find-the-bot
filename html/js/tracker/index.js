@@ -1,16 +1,55 @@
 var Tweet = React.createClass({
-    handleClick: function(e) {
-        this.props.handleClickedUsernameEvent(e);
+    _match: function(text, rx, callback) {
+        var text_processed = [];
+
+        for(var i = 0; i < text.length; i++) {
+            var match, found = false;
+
+            if(typeof text[i] === 'string') {
+                var start_index = 0;
+
+                while((match = rx.exec(text[i])) !== null) {
+                    found = true;
+
+                    var text_before = text[i].substring(start_index, match.index);
+
+                    text_processed.push(text_before);
+                    text_processed.push(<a onClick={callback.bind(this, match[1])}>{match[0]}</a>);
+
+                    start_index = rx.lastIndex;
+                }
+
+                if(found) {
+                    text_processed.push(text[i].substring(start_index));
+                }
+            }
+
+            if(!found) {
+                text_processed.push(text[i]);
+            }
+        }
+
+        return text_processed;
     },
 
     render: function() {
+        var hashtagRegex = /#(\w+)/g,
+            mentionRegex = /@(\w+)/g;
+
+        var text = [this.props.tweet.text];
+
+        text = this._match(text, hashtagRegex, this.props.handleClickedHashtagEvent);
+        text = this._match(text, mentionRegex, this.props.handleClickedUsernameEvent);
+
+        var handledClickTweeter = this.props.handleClickedUsernameEvent.bind.bind(this, this.props.user.screen_name);
+
         return <div className="tweet">
             <p className="profile-img"><img src={this.props.user.profile_image_url} /></p>
-            <p className="userinfo" onClick={this.handleClick}>
+            <p className="userinfo" onClick={handledClickTweeter}>
                 <span className="fullname">{this.props.user.full_name}</span>
                 <span className="screenname">@{this.props.user.screen_name}</span>
             </p>
-            <p dangerouslySetInnerHTML={{__html: this.props.tweet.text}} />
+            {text}
         </div>;
     }
 });
@@ -242,15 +281,15 @@ var Tracker = React.createClass({
         window.location.hash = "hash"+hashtag;
     },
 
-    handleClickedUsername: function(tweetdata, e) {
+    handleClickedUsername: function(screenname, e) {
         e.preventDefault();
         this.setState({
             activeTag: null,
-            activeUser: tweetdata.user.screen_name
+            activeUser: screenname
         });
-        var users = [tweetdata.user.screen_name];
+        var users = [screenname];
         for(var i = 0; i < this.state.users.length; i++) {
-            if(this.state.users[i] == tweetdata.user.screen_name) {
+            if(this.state.users[i] == screenname) {
                 return;
             }
 
@@ -259,7 +298,27 @@ var Tracker = React.createClass({
         this.setState({
             users: users
         });
-        window.location.hash = "user"+tweetdata.user.screen_name;
+        window.location.hash = "user"+screenname;
+    },
+
+    handleClickedHashtag: function(hashtag, e) {
+        e.preventDefault();
+        this.setState({
+            activeTag: hashtag,
+            activeUser: null
+        });
+        var tags = [hashtag];
+        for(var i = 0; i < this.state.tags.length; i++) {
+            if(this.state.tags[i] == hashtag) {
+                return;
+            }
+
+            tags.push(this.state.tags[i]);
+        }
+        this.setState({
+            tags: tags
+        });
+        window.location.hash = "user"+hashtag;
     },
 
     handleUserClick: function(e) {
@@ -398,8 +457,9 @@ var Tracker = React.createClass({
 
         for(var i = 0; i < this.state.tweets.length; i++) {
             var tweetdata = this.state.tweets[i];
-            var handleClickedUsername = this.handleClickedUsername.bind(this, tweetdata);
-            tweets.push(<Tweet handleClickedUsernameEvent={handleClickedUsername} key={tweetdata.tweet.id} user={tweetdata.user} tweet={tweetdata.tweet} />);
+            var handleClickedUsername = this.handleClickedUsername.bind(this);
+            var handleClickedHashtag = this.handleClickedHashtag.bind(this);
+            tweets.push(<Tweet handleClickedHashtagEvent={handleClickedHashtag} handleClickedUsernameEvent={handleClickedUsername} key={tweetdata.tweet.id} user={tweetdata.user} tweet={tweetdata.tweet} />);
         }
 
         if(tweets.length == 0 && this.state.loading) {
