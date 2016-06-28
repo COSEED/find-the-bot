@@ -1,4 +1,8 @@
 var Tweet = React.createClass({
+    _trigger: function(cb, arg) {
+        cb(arg);
+    },
+
     _match: function(text, rx, callback) {
         var text_processed = [];
 
@@ -14,7 +18,7 @@ var Tweet = React.createClass({
                     var text_before = text[i].substring(start_index, match.index);
 
                     text_processed.push(text_before);
-                    text_processed.push(<a onClick={callback.bind(this, match[1])}>{match[0]}</a>);
+                    text_processed.push(<a onClick={this._trigger.bind(this, callback, match[1])}>{match[0]}</a>);
 
                     start_index = rx.lastIndex;
                 }
@@ -41,7 +45,7 @@ var Tweet = React.createClass({
         text = this._match(text, hashtagRegex, this.props.handleClickedHashtagEvent);
         text = this._match(text, mentionRegex, this.props.handleClickedUsernameEvent);
 
-        var handledClickTweeter = this.props.handleClickedUsernameEvent.bind.bind(this, this.props.user.screen_name);
+        var handledClickTweeter = this._trigger.bind(this, this.props.handleClickedUsernameEvent, this.props.user.screen_name);
 
         return <div className="tweet">
             <p className="profile-img"><img src={this.props.user.profile_image_url} /></p>
@@ -282,7 +286,6 @@ var Tracker = React.createClass({
     },
 
     handleClickedUsername: function(screenname, e) {
-        e.preventDefault();
         this.setState({
             activeTag: null,
             activeUser: screenname
@@ -302,7 +305,6 @@ var Tracker = React.createClass({
     },
 
     handleClickedHashtag: function(hashtag, e) {
-        e.preventDefault();
         this.setState({
             activeTag: hashtag,
             activeUser: null
@@ -457,9 +459,7 @@ var Tracker = React.createClass({
 
         for(var i = 0; i < this.state.tweets.length; i++) {
             var tweetdata = this.state.tweets[i];
-            var handleClickedUsername = this.handleClickedUsername.bind(this);
-            var handleClickedHashtag = this.handleClickedHashtag.bind(this);
-            tweets.push(<Tweet handleClickedHashtagEvent={handleClickedHashtag} handleClickedUsernameEvent={handleClickedUsername} key={tweetdata.tweet.id} user={tweetdata.user} tweet={tweetdata.tweet} />);
+            tweets.push(<Tweet handleClickedHashtagEvent={this.handleClickedHashtag} handleClickedUsernameEvent={this.handleClickedUsername} key={tweetdata.tweet.id} user={tweetdata.user} tweet={tweetdata.tweet} />);
         }
 
         if(tweets.length == 0 && this.state.loading) {
