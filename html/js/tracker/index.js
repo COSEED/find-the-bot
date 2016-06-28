@@ -1,4 +1,12 @@
+var EggUrl = '/static/img/egg-blue.jpg';
+
 var Tweet = React.createClass({
+    getInitialState: function() {
+        return {
+            imgError: false
+        };
+    },
+
     _trigger: function(cb, arg) {
         cb(arg);
     },
@@ -36,6 +44,12 @@ var Tweet = React.createClass({
         return text_processed;
     },
 
+    handleErrorImg: function(e) {
+        this.setState({
+            imgError: true
+        });
+    },
+
     render: function() {
         var hashtagRegex = /#(\w+)/g,
             mentionRegex = /@(\w+)/g;
@@ -47,8 +61,10 @@ var Tweet = React.createClass({
 
         var handledClickTweeter = this._trigger.bind(this, this.props.handleClickedUsernameEvent, this.props.user.screen_name);
 
+        var imgUrl = (this.state.imgError ? EggUrl : this.props.user.profile_image_url);
+
         return <div className="tweet">
-            <p className="profile-img"><img src={this.props.user.profile_image_url} /></p>
+            <p className="profile-img"><img onError={this.handleErrorImg} src={imgUrl} /></p>
             <p className="userinfo" onClick={handledClickTweeter}>
                 <span className="fullname">{this.props.user.full_name}</span>
                 <span className="screenname">@{this.props.user.screen_name}</span>
@@ -63,7 +79,8 @@ var Profile = React.createClass({
         return {
             loading: true,
             marked: false,
-            user: null
+            user: null,
+            profileImgError: false
         };
     },
 
@@ -118,6 +135,12 @@ var Profile = React.createClass({
         });
     },
 
+    handleProfileImgError: function(e) {
+        this.setState({
+            profileImgError: true
+        });
+    },
+
     render: function() {
         if(this.state.loading) {
             return <div />;
@@ -131,22 +154,37 @@ var Profile = React.createClass({
             markBtn = <button onClick={this.handleClickUnmarkAsBot} className="mark-as-bot unmark">Unmark user as bot</button>;
         }
 
+        var imgUrl = (this.state.profileImgError ? EggUrl : this.state.user.profile_image_url);
+
+
+        var locationCls = "glyphicon glyphicon-map-marker";
+        if(!this.state.user.location) {
+            locationCls += " no-data";
+        }
+
+        var websiteCls = "glyphicon glyphicon-link";
+        if(!this.state.user.website) {
+            websiteCls += " no-data";
+        }
+
         return <div>
             <div className="top">
-                <span className="profile-photo"><img src={this.state.user.profile_image_url} /></span>
-                <h1>{this.state.user.full_name}</h1>
-                <h2>@{this.state.user.screen_name}</h2>
-                <p className="bio">{this.state.user.bio}</p>
-                {markBtn}
+                <span className="profile-photo"><img onError={this.handleProfileImgError} src={imgUrl} /></span>
+                <div className="profile-info">
+                    <h1>{this.state.user.full_name}</h1>
+                    <h2>@{this.state.user.screen_name}</h2>
+                    <p className="bio">{this.state.user.bio}</p>
+                    {markBtn}
+                </div>
             </div>
             <div className="info">
                 <ul className="short">
                     <li>
-                        <span className="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+                        <span className={locationCls} aria-hidden="true"></span>
                         {this.state.user.location}
                     </li>
                     <li>
-                        <span className="glyphicon glyphicon-link" aria-hidden="true"></span>
+                        <span className={websiteCls} aria-hidden="true"></span>
                         {this.state.user.website}
                     </li>
                 </ul>
@@ -471,7 +509,7 @@ var Tracker = React.createClass({
         var tags = [], users = [];
 
         for(var i = 0; i < this.state.tags.length; i++) {
-            var cls = "";
+            var cls = "", playpause = "";
             if(this.state.activeTag === this.state.tags[i]) {
                 cls += "nav-active";
                 if(this.state.playing) {
@@ -494,7 +532,7 @@ var Tracker = React.createClass({
         }
 
         for(var i = 0; i < this.state.users.length; i++) {
-            var cls = "", playpause;
+            var cls = "", playpause = "";
             if(this.state.activeUser === this.state.users[i]) {
                 cls += "nav-active";
                 if(this.state.playing) {
@@ -539,7 +577,7 @@ var Tracker = React.createClass({
         var profile_panel = '';
 
         if(this.state.activeUser !== null) {
-            profile_panel = <Profile screen_name={this.state.activeUser} />;
+            profile_panel = <Profile key={this.state.activeUser} screen_name={this.state.activeUser} />;
         }
 
         return <div>

@@ -25,7 +25,11 @@
 
 #leftpanel .nav {
     margin: 16px 0;
+}
+
+#leftpanel .nav .header {
     padding: 5px 20px;
+    display: block;
 }
 
 #leftpanel .nav-active {
@@ -37,8 +41,13 @@
     margin-top: 15px;
 }
 
+#leftpanel .nav .entries > ul {
+    padding: 0;
+}
+
 #leftpanel .nav li {
     list-style-type: none;
+    padding: 5px;
 }
 
 #leftpanel .nav .header .glyphicon-plus-sign {
@@ -148,22 +157,6 @@
     margin: 0;
 }
 
-.tweet button.mark-as-bot {
-    display: none;
-    border: 0;
-    position: absolute;
-    top: calc(50% - 20px);
-    left: calc(50% - 100px);
-    background-color: #eee;
-    border-radius: 3px;
-    cursor: pointer;
-    padding: 10px 60px;
-}
-
-.tweet:hover button.mark-as-bot {
-    display: block;
-}
-
 #profilepanel .top .profile-photo {
     width: 150px;
     height: 150px;
@@ -171,17 +164,37 @@
     margin-right: 30px;
 }
 
+#profilepanel .top .mark-as-bot {
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    height: 30px;
+}
+
 #profilepanel .top .profile-photo img {
-    max-width: 150px;
+    width: 150px;
     max-height: 150px;
     float: left;
+}
+
+#profilepanel .top .profile-info {
+    display: inline-block;
+    vertical-align: top;
 }
 
 #profilepanel .top h1,
 #profilepanel .top h2
 {
-    display: inline-block;
     vertical-align: top;
+    margin: 0;
 }
 
+#profilepanel .no-data {
+    color: #888;
+}
 
+#profilepanel .no-data:after {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    content: "(none)";
+}
