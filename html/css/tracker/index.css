@@ -57,13 +57,13 @@
 
 #leftpanel .nav .header .glyphicon-plus-sign {
     float: right;
-    color: #aaa;
+    color: #888;
     cursor: pointer;
 }
 
 #leftpanel ul .glyphicon.glyphicon-remove {
     float: right;
-    color: #aaa;
+    color: #daa;
     cursor: pointer;
 }
 
@@ -91,7 +91,7 @@
 
 #leftpanel .nav .entries li {
     list-style-type: none;
-    padding: 2px 10px 2px 30px;
+    padding: 2px 20px 2px 30px;
 }
 
 #leftpanel .entries li, #leftpanel .firehose {
