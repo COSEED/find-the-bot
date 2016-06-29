@@ -143,7 +143,7 @@ var Profile = React.createClass({
 
     render: function() {
         if(this.state.loading) {
-            return <div />;
+            return <div className="loading" />;
         }
         
         var markBtn;
@@ -231,17 +231,20 @@ var Tracker = React.createClass({
 
             if(userResult) {
                 this.setState({
-                    activeUser: userResult[1]
+                    activeUser: userResult[1],
+                    loading: true,
+                    tweets: []
                 });
             } else if(tagResult) {
                 this.setState({
-                    activeTag: tagResult[1]
+                    activeTag: tagResult[1],
+                    loading: true,
+                    tweets: []
                 });
             }
         }
 
         window.setInterval(this._tick, 250);
-        this._tick();
     },
 
     componentDidUpdate: function() {
@@ -281,7 +284,10 @@ var Tracker = React.createClass({
                 tag: this.state.activeTag,
                 user: this.state.activeUser
             },
-            success: this._updateStream,
+            success: this._updateStream.bind(this, {
+                user: this.state.activeUser, 
+                tag: this.state.activeTag
+            }),
             error: function() {
                 this.setState({ 
                     ajaxXHR: null
@@ -295,10 +301,18 @@ var Tracker = React.createClass({
         });
     },
 
-    _updateStream: function(result, textStatus, jqXHR) {
+    _updateStream: function(query, result, textStatus, jqXHR) {
+        // Stale tick
+        this.setState({
+            ajaxXHR: null
+        });
+
+        if(query.tag !== this.state.activeTag || query.user !== this.state.activeUser) {
+            return;
+        }
+
         this.setState({
             tweets: result.tweets,
-            ajaxXHR: null,
             loading: false
         });
     },
@@ -306,7 +320,9 @@ var Tracker = React.createClass({
     handleFirehoseClick: function(e) {
         this.setState({
             activeTag: null,
-            activeUser: null
+            activeUser: null,
+            loading: true,
+            tweets: []
         });
 
         window.location.hash = "";
@@ -317,7 +333,9 @@ var Tracker = React.createClass({
 
         this.setState({
             activeTag: hashtag,
-            activeUser: null
+            activeUser: null,
+            loading: true,
+            tweets: []
         });
 
         window.location.hash = "hash"+hashtag;
@@ -326,7 +344,9 @@ var Tracker = React.createClass({
     handleClickedUsername: function(screenname, e) {
         this.setState({
             activeTag: null,
-            activeUser: screenname
+            activeUser: screenname,
+            loading: true,
+            tweets: []
         });
         var users = [screenname];
         for(var i = 0; i < this.state.users.length; i++) {
@@ -345,7 +365,9 @@ var Tracker = React.createClass({
     handleClickedHashtag: function(hashtag, e) {
         this.setState({
             activeTag: hashtag,
-            activeUser: null
+            activeUser: null,
+            loading: true,
+            tweets: []
         });
         var tags = [hashtag];
         for(var i = 0; i < this.state.tags.length; i++) {
@@ -366,7 +388,9 @@ var Tracker = React.createClass({
 
         this.setState({
             activeTag: null,
-            activeUser: user
+            activeUser: user,
+            loading: true,
+            tweets: []
         });
 
         window.location.hash = "user"+user;
@@ -385,7 +409,9 @@ var Tracker = React.createClass({
 
         if(this.state.activeUser == this.state.users[i]) {
             this.setState({
-                activeUser: null
+                activeUser: null,
+                loading: true,
+                tweets: []
             });
         }
     },
@@ -403,7 +429,9 @@ var Tracker = React.createClass({
 
         if(this.state.activeTag == this.state.tags[i]) {
             this.setState({
-                activeTag: null
+                activeTag: null,
+                loading: true,
+                tweets: []
             });
         }
     },
@@ -501,9 +529,9 @@ var Tracker = React.createClass({
         }
 
         if(tweets.length == 0 && this.state.loading) {
-            tweets.push(<p key={'loading'}>Loading tweets...</p>);
+            tweets.push(<p className="loading" key={'loading'}>Loading tweets...</p>);
         } else if(tweets.length == 0) {
-            tweets.push(<p key={'loading'}>There are no tweets yet.</p>);
+            tweets.push(<p className="loading" key={'loading'}>There are no tweets yet.</p>);
         }
 
         var tags = [], users = [];
