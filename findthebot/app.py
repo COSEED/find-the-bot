@@ -151,6 +151,7 @@ class Tuser(db.Model):
     protected = db.Column(db.Boolean)
 
     db.Index('tuser_by_id_timestamp', user_id, timestamp)
+    db.Index('tuser_by_screen_name', screen_name)
 
     tweets = db.relationship('Tweet', primaryjoin="and_(foreign(Tweet.user_id)==Tuser.user_id)", order_by="desc(Tweet.timestamp)")
     lessons = db.relationship('TuserLesson', lazy='joined')
@@ -201,7 +202,8 @@ class Tweet(db.Model):
         return time.strftime("%d %b %Y &middot; %I:%M %p", time.gmtime(self.timestamp))
 
 class TweetSchema(Schema):
-    id = fields.Int(load_from='tweet_id')
+    id = fields.Int(load_from='id')
+    tweet_id = fields.Str(load_from='tweet_id')
     text = fields.Str()
 tweet_schema = TweetSchema()
 
@@ -399,7 +401,7 @@ def tweet_stream(team_id):
         since_id = None
     max_id = request.args.get('max_id', None)
     if max_id != "" and max_id is not None:
-        max_id = int(max_id)
+        max_id = int(max_id)-1 # fucking javascript
     else:
         max_id = None
 
@@ -430,10 +432,21 @@ def tweet_stream(team_id):
 
     tweets = filter(lambda t: t.timestamp <= int(virtual_time_upper), tweets)
 
-    return jsonify(tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'user': tuser_schema.dump(tweet.tuser)[0]} for tweet in tweets])
+    if len(tweets): # fucking javascript
+        min_tweet_id = str(min([tweet.tweet_id for tweet in tweets]))
+        max_tweet_id = str(max([tweet.tweet_id for tweet in tweets]))
+    else:
+        min_tweet_id = max_tweet_id = None
+
+    return jsonify(min_tweet_id=min_tweet_id, max_tweet_id=max_tweet_id, tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'user': tuser_schema.dump(tweet.tuser)[0]} for tweet in tweets])
 
 def tweet_stream_tag(virtual_time_upper, tag, since_id=None, max_id = None, limit=3):
     entities = TweetEntity.query.filter(TweetEntity.type == "hashtag").filter(TweetEntity.text == tag.lower())
+
+    if since_id is None and max_id is None:
+        # Find a tweet_id that we can compare against
+        tweet = Tweet.query.filter(Tweet.timestamp <= int(virtual_time_upper)).order_by(Tweet.timestamp.desc()).limit(1).one()
+        max_id = tweet.tweet_id - 1
 
     if since_id is not None:
         entities = entities.filter(TweetEntity.tweet_id > since_id)
@@ -459,14 +472,20 @@ def tweet_stream_tag(virtual_time_upper, tag, since_id=None, max_id = None, limi
 
     return tweets
 
-def tweet_stream_users(virtual_time_upper, user, since_id = None, max_id = None):
+def tweet_stream_users(virtual_time_upper, user, since_id = None, max_id = None, limit=2):
     tweets = Tweet.query.filter(Tweet.user_id == user)
     if since_id is not None:
         tweets = tweets.filter(Tweet.tweet_id > since_id)
     if max_id is not None:
         tweets = tweets.filter(Tweet.tweet_id <= max_id)
 
-    tweets = tweets.order_by(Tweet.tweet_id.desc())
+    if since_id is None and max_id is None:
+        tweets = tweets.filter(Tweet.timestamp < int(virtual_time_upper)).order_by(Tweet.timestamp.desc()).limit(limit)
+    elif max_id is not None:
+        tweets = tweets.order_by(Tweet.tweet_id.desc()).limit(limit)
+    else:
+        tweets = tweets.order_by(Tweet.tweet_id.asc()).limit(limit)
+
     tweets = tweets.all()
 
     tusers = {}
@@ -478,14 +497,19 @@ def tweet_stream_users(virtual_time_upper, user, since_id = None, max_id = None)
 
     return tweets
 
-def tweet_stream_all(virtual_time_upper, since_id = None, max_id = None):
+def tweet_stream_all(virtual_time_upper, since_id = None, max_id = None, limit=2):
     tweets = Tweet.query
     if since_id is not None:
         tweets = tweets.filter(Tweet.tweet_id > since_id)
     if max_id is not None:
         tweets = tweets.filter(Tweet.tweet_id <= max_id)
 
-    tweets = tweets.order_by(Tweet.tweet_id.desc())
+    if since_id is None and max_id is None:
+        tweets = tweets.filter(Tweet.timestamp < int(virtual_time_upper)).order_by(Tweet.timestamp.desc()).limit(limit)
+    elif max_id is not None:
+        tweets = tweets.order_by(Tweet.tweet_id.desc()).limit(limit)
+    else:
+        tweets = tweets.order_by(Tweet.tweet_id.asc()).limit(limit)
     tweets = tweets.all()
 
     tusers = {}

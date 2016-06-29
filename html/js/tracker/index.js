@@ -340,29 +340,41 @@ var Tracker = React.createClass({
         };
     },
     
-    _descend: function() {
+    _descend: function(query) {
+        if(!this.compareQuery(query)) {
+            return;
+        }
+
         var data = {
             tag: this.state.activeTag,
-            user: this.state.activeUser
+            user: Number(this.state.activeUserProfile.user.user_id),
+            max_id: this.state.maxId
         };
 
         this.setState({
             loadingMore: true
         });
 
-        if(this.state.maxId) {
-            data.maxId = this.state.maxId - 1;
-        }
-
         var ajaxXHR = $.ajax({
             url: '/stream',
             data: data,
             success: function(response) {
+                if(response.tweets.length === 0) {
+                    return;
+                }
+
                 var tweets = this.state.tweets.concat(response.tweets);
 
                 this.setState({
-                    tweets: tweets
+                    tweets: tweets,
                 });
+
+                if(response.tweets.length) {
+                    this.setState({
+                        maxId: response.min_tweet_id
+                    }, this._descend.bind(this, query));
+                }
+
             }.bind(this),
             complete: function() {
                 this.setState({
@@ -371,6 +383,17 @@ var Tracker = React.createClass({
             }.bind(this),
             timeout: TIMEOUT
         });
+    },
+
+    getQuery: function() {
+        return {
+            activeUser: this.state.activeUser,
+            activeTag: this.state.activeTag,
+        };
+    },
+
+    compareQuery: function(q) {
+        return (this.state.activeUser === q.activeUser && this.state.activeTag === q.activeTag);
     },
 
     _tick: function() {
@@ -382,17 +405,24 @@ var Tracker = React.createClass({
             return;
         }
 
+        if(this.state.activeUser !== null && (this.state.activeUserProfile == null || this.state.activeUserProfile.user.screen_name != this.state.activeUser)) {
+            return;
+        }
+
+        var user;
+
+        if(this.state.activeUser) {
+            user = Number(this.state.activeUserProfile.user.user_id);
+        }
+
         var ajaxXHR = $.ajax({
             url: '/stream',
             data: {
                 tag: this.state.activeTag,
-                user: this.state.activeUser,
+                user: user,
                 since_id: this.state.sinceId
             },
-            success: this._updateStream.bind(this, {
-                user: this.state.activeUser, 
-                tag: this.state.activeTag
-            }),
+            success: this._updateStream.bind(this, this.getQuery()),
             error: function() {
                 this.setState({ 
                     ajaxXHR: null
@@ -407,19 +437,33 @@ var Tracker = React.createClass({
     },
 
     _updateStream: function(query, result, textStatus, jqXHR) {
-        // Stale tick
-        this.setState({
-            ajaxXHR: null
-        });
+        if(!this.compareQuery(query)) {
+            return;
+        }
 
-        if(query.tag !== this.state.activeTag || query.user !== this.state.activeUser) {
+        if(result.tweets.length === 0) {
             return;
         }
 
         this.setState({
-            tweets: result.tweets,
+            tweets: result.tweets.concat(this.state.tweets),
+            ajaxXHR: null,
             loading: false
         });
+
+        if(result.tweets.length > 0) {
+            this.setState({
+                sinceId: result.max_tweet_id
+            });
+
+            if(!this.state.maxId) {
+                this.setState({
+                    maxId: result.min_tweet_id
+                });
+            }
+
+            this._descend(query);
+        }
     },
         
     handleFirehoseClick: function(e) {
