@@ -8,7 +8,8 @@ var GuessesPanel = React.createClass({
     getInitialState: function() {   
         return {
             guesses: [],
-            interval: null
+            interval: null,
+            loading: true
         };
     },
 
@@ -29,7 +30,8 @@ var GuessesPanel = React.createClass({
 
     _handleGuesses: function(result, textStatus, jqXHR) {
         this.setState({
-            guesses: result.guesses
+            guesses: result.guesses,
+            loading: false
         });
     },
 
@@ -38,6 +40,10 @@ var GuessesPanel = React.createClass({
     },
 
     render: function() {
+        if(this.state.loading) {
+            return <div className="loading"></div>;
+        }
+
         var guesses = [];
 
         for(var i = 0; i < this.state.guesses.length; i++) {

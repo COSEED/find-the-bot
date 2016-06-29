@@ -232,6 +232,10 @@
     border-bottom: 1px solid #ddd;
 }
 
+#guesspanel .loading:before {
+    content: "Loading your guesses...";
+}
+
 #profilepanel .loading:before {
     content: "Loading profile...";
 }
