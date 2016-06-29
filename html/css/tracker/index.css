@@ -94,7 +94,7 @@
     padding: 2px 20px 2px 30px;
 }
 
-#leftpanel .entries li, #leftpanel .firehose {
+#leftpanel .entries li, #leftpanel .firehose, #leftpanel .guesses {
     cursor: pointer;
 }
 
@@ -234,4 +234,12 @@
 
 #profilepanel .loading:before {
     content: "Loading profile...";
+}
+
+.nohide {
+    display: inherit;
+}
+
+.hide {
+    display: none;
 }

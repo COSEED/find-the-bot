@@ -276,6 +276,7 @@ var Tracker = React.createClass({
             ajaxXHR: null,
             activeTag: null,
             activeUser: null,
+            guessesActive: false,
             loading: true,
             tags: [],
             users: [],
@@ -340,6 +341,7 @@ var Tracker = React.createClass({
         this.setState({
             activeTag: null,
             activeUser: null,
+            guessesActive: false,
             loading: true,
             tweets: [],
             playing: true
@@ -354,6 +356,7 @@ var Tracker = React.createClass({
         this.setState({
             activeTag: hashtag,
             activeUser: null,
+            guessesActive: false,
             loading: true,
             tweets: [],
             playing: true
@@ -366,6 +369,7 @@ var Tracker = React.createClass({
         this.setState({
             activeTag: null,
             activeUser: screenname,
+            guessesActive: false,
             loading: true,
             tweets: [],
             playing: true
@@ -388,6 +392,7 @@ var Tracker = React.createClass({
         this.setState({
             activeTag: hashtag,
             activeUser: null,
+            guessesActive: false,
             loading: true,
             tweets: [],
             playing: true
@@ -412,6 +417,7 @@ var Tracker = React.createClass({
         this.setState({
             activeTag: null,
             activeUser: user,
+            guessesActive: false,
             loading: true,
             tweets: [],
             playing: true,
@@ -458,6 +464,7 @@ var Tracker = React.createClass({
         if(this.state.activeUser == this.state.users[i]) {
             this.setState({
                 activeUser: null,
+                guessesActive: false,
                 loading: true,
                 tweets: []
             });
@@ -568,6 +575,17 @@ var Tracker = React.createClass({
         e.preventDefault();
     },
 
+    handleGuessesClick: function(e) {
+        this.setState({
+            guessesActive: true,
+            activeTag: null,
+            activeUser: null,
+            loading: true,
+            playing: true,
+            activeUserProfile: null
+        });
+    },
+
     render: function() {
         var tweets = [];
 
@@ -638,10 +656,20 @@ var Tracker = React.createClass({
         }
 
         var firehose_cls = "nav  nav-loading firehose";
+        var guesses_cls = "nav guesses";
+        var guess_hide = "nohide";
+        var guess_panel = "";
+
+        if(this.state.guessesActive) {
+            guesses_cls += " nav-active";
+            guess_hide = "hide";
+
+            guess_panel = "test";
+        }
 
         var playpause_firehose = '';
 
-        if(this.state.activeUser === null && this.state.activeTag === null) {
+        if(this.state.activeUser === null && this.state.activeTag === null && this.state.guessesActive == false) {
             firehose_cls += " nav-active";
             if(this.state.playing) {
                 playpause_firehose = <span onClick={this.handlePauseClick} className="glyphicon glyphicon-pause"></span>;
@@ -658,6 +686,10 @@ var Tracker = React.createClass({
 
         return <div>
             <div id="leftpanel">
+                <div onClick={this.handleGuessesClick} className={guesses_cls}>
+                    <span className="header">Guesses</span>
+                </div>
+
                 <div onClick={this.handleFirehoseClick} className={firehose_cls}>
                     {playpause_firehose}
                     <span className="header">Firehose</span>
@@ -684,11 +716,14 @@ var Tracker = React.createClass({
                 </div>
             </div>
             <div id="mainpanel">
-                <div id="profilepanel">
+                <div className={guess_hide} id="profilepanel">
                     {profile_panel}
                 </div>
-                <div id="tweets">
+                <div className={guess_hide} id="tweets">
                     {tweets}
+                </div>
+                <div id="guesspanel">
+                    {guess_panel}
                 </div>
             </div>
         </div>;

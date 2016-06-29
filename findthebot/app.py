@@ -367,6 +367,7 @@ def tweet_stream_profile(team_id):
     marked = GuessTuser.query.filter(GuessTuser.team_id == team_id, GuessTuser.tuser_id == tuser.id).count()
     return jsonify(tuser=tuser_schema.dump(tuser)[0], marked=bool(marked))
 
+
 @app.route('/stream')
 @requires_auth
 def tweet_stream(team_id):
@@ -454,6 +455,14 @@ def tracker_unguess(team_id):
     db.session.commit()
     
     return ""
+
+
+@app.route('/guesses')
+@requires_auth
+def tracker_guesses(team_id):
+    guesses = GuessTuser.query.filter(GuessTuser.team_id == team_id).all()
+
+    return jsonify(users=[tuser_schema.dump(guess.tuser)[0] for guess in guesses])
 
 if __name__ == "__main__":
     app.run(debug=debug, host='0.0.0.0', port=int(os.getenv("PORT")))
