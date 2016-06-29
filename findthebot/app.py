@@ -295,12 +295,12 @@ def find_results(bots, test):
 
 @app.route('/')
 @requires_auth_shared
-def index(team_id):
+def index():
     return render_template("index.html")
 
 @app.route('/test/new', methods=['POST'])
 @requires_auth_shared
-def test_new(team_id):
+def test_new():
     test = Test()
     db.session.add(test)
     db.session.commit()
@@ -317,7 +317,7 @@ def test_new(team_id):
 
 @app.route('/test/<test_id>/complete')
 @requires_auth_shared
-def test_done(team_id, test_id):
+def test_done(test_id):
     test = Test.query.filter(Test.id == test_id).first()
     bots = TeamBot.query.all()
     bots_userids = set([str(bot.twitter_id) for bot in bots])
@@ -328,7 +328,7 @@ def test_done(team_id, test_id):
 
 @app.route('/test/<test_id>/guess', methods=['POST'])
 @requires_auth_shared
-def test_makeguess(team_id, test_id):
+def test_makeguess(test_id):
     user_id = request.form["tuser_id"]
     guess_is_bot = request.form["guess_is_bot"] == "1"
 
@@ -364,7 +364,7 @@ def test_makeguess(team_id, test_id):
 
 @app.route('/test/<test_id>/<guess_id>')
 @requires_auth_shared
-def test_showguess(team_id, test_id, guess_id):
+def test_showguess(test_id, guess_id):
     test = Test.query.filter(Test.id == test_id).first()
 
     if int(guess_id) >= len(test.selections):
