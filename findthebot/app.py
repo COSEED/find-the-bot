@@ -456,7 +456,7 @@ def tweet_stream_tag(virtual_time_upper, tag, since_id=None, max_id = None, limi
     if max_id is not None:
         entities = entities.filter(TweetEntity.tweet_id <= max_id)
 
-    entities = entities.order_by(TweetEntity.tweet_id.desc()).limit(limit)
+    entities = entities.order_by(TweetEntity.tweet_id.asc()).limit(limit)
     entities = entities.all()
 
     if len(entities) == 0:
@@ -483,7 +483,7 @@ def tweet_stream_users(virtual_time_upper, user, since_id = None, max_id = None,
         tweets = tweets.filter(Tweet.tweet_id <= max_id)
 
     if since_id is None and max_id is None:
-        tweets = tweets.filter(Tweet.timestamp < int(virtual_time_upper)).order_by(Tweet.timestamp.desc()).limit(limit)
+        tweets = tweets.filter(Tweet.timestamp < int(virtual_time_upper)).order_by(Tweet.timestamp.asc()).limit(limit)
     elif max_id is not None:
         tweets = tweets.order_by(Tweet.tweet_id.desc()).limit(limit)
     else:
