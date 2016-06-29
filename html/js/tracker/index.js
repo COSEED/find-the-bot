@@ -1,4 +1,6 @@
-var EggUrl = '/static/img/egg-blue.jpg';
+var TIME_WINDOW = 30;
+var DESCEND_LIMIT = 1000;
+var EGG_URL = '/static/img/egg-blue.jpg';
 
 var Tweet = React.createClass({
     getInitialState: function() {
@@ -61,7 +63,7 @@ var Tweet = React.createClass({
 
         var handledClickTweeter = this._trigger.bind(this, this.props.handleClickedUsernameEvent, this.props.user.screen_name);
 
-        var imgUrl = (this.state.imgError ? EggUrl : this.props.user.profile_image_url);
+        var imgUrl = (this.state.imgError ? EGG_URL : this.props.user.profile_image_url);
 
         return <div className="tweet">
             <p className="profile-img"><img onError={this.handleErrorImg} src={imgUrl} /></p>
@@ -77,19 +79,18 @@ var Tweet = React.createClass({
 var Profile = React.createClass({
     getInitialState: function() {
         return {
-            loading: true,
             marked: false,
-            user: null,
-            profileImgError: false
+            profileImgError: false,
+            marking: false
         };
     },
 
-    handleProfile: function(response) {
-        this.setState({
-            loading: false,
-            user: response.tuser,
-            marked: response.marked
-        });
+    componentDidUpdate: function(prevProps, prevState) {
+        if(this.props.profile && (!prevProps.profile || (prevProps.profile.marked !== this.props.profile.marked))) {
+            this.setState({
+                marked: this.props.profile.marked
+            });
+        }
     },
 
     _handleMarkBot: function(marked) {
@@ -99,7 +100,11 @@ var Profile = React.createClass({
     },
 
     handleClickMarkAsBot: function() {
-        var tuser_id = this.state.user.id;
+        var tuser_id = this.props.profile.user.id;
+
+        this.setState({
+            marking: true
+        });
 
         $.ajax({
             url: '/tracker/guess',
@@ -107,12 +112,21 @@ var Profile = React.createClass({
             data: {
                 tuser_id: tuser_id
             },
-            success: this._handleMarkBot.bind(this, true)
+            success: this._handleMarkBot.bind(this, true),
+            complete: function() {
+                this.setState({
+                    marking: false
+                });
+            }.bind(this)
         });
     },
 
     handleClickUnmarkAsBot: function() {
-        var tuser_id = this.state.user.id;
+        var tuser_id = this.props.profile.user.id;
+
+        this.setState({
+            marking: true
+        });
 
         $.ajax({
             url: '/tracker/unguess',
@@ -120,18 +134,12 @@ var Profile = React.createClass({
             data: {
                 tuser_id: tuser_id
             },
-            success: this._handleMarkBot.bind(this, false)
-        });
-    },
-
-    componentDidMount: function() {
-        $.ajax({
-            url: '/profile',
-            method: 'GET',
-            data: {
-                screen_name: this.props.screen_name
-            },
-            success: this.handleProfile
+            success: this._handleMarkBot.bind(this, false),
+            complete: function() {
+                this.setState({
+                    marking: false
+                });
+            }.bind(this)
         });
     },
 
@@ -142,28 +150,29 @@ var Profile = React.createClass({
     },
 
     render: function() {
-        if(this.state.loading) {
+        if(this.props.profile === null) {
             return <div className="loading" />;
         }
         
         var markBtn;
         
+        var marking = (this.state.marking ? 'disabled' : '');
+
         if(!this.state.marked) {
-            markBtn = <button onClick={this.handleClickMarkAsBot} className="mark-as-bot">Mark user as bot</button>;
+            markBtn = <button disabled={marking} onClick={this.handleClickMarkAsBot} className="mark-as-bot">Mark user as bot</button>;
         } else {
-            markBtn = <button onClick={this.handleClickUnmarkAsBot} className="mark-as-bot unmark">Unmark user as bot</button>;
+            markBtn = <button disabled={marking} onClick={this.handleClickUnmarkAsBot} className="mark-as-bot unmark">Unmark user as bot</button>;
         }
 
-        var imgUrl = (this.state.profileImgError ? EggUrl : this.state.user.profile_image_url);
-
+        var imgUrl = (this.state.profileImgError ? EGG_URL : this.props.profile.user.profile_image_url);
 
         var locationCls = "glyphicon glyphicon-map-marker";
-        if(!this.state.user.location) {
+        if(!this.props.profile.user.location) {
             locationCls += " no-data";
         }
 
         var websiteCls = "glyphicon glyphicon-link";
-        if(!this.state.user.website) {
+        if(!this.props.profile.user.website) {
             websiteCls += " no-data";
         }
 
@@ -171,9 +180,9 @@ var Profile = React.createClass({
             <div className="top">
                 <span className="profile-photo"><img onError={this.handleProfileImgError} src={imgUrl} /></span>
                 <div className="profile-info">
-                    <h1>{this.state.user.full_name}</h1>
-                    <h2>@{this.state.user.screen_name}</h2>
-                    <p className="bio">{this.state.user.bio}</p>
+                    <h1>{this.props.profile.user.full_name}</h1>
+                    <h2>@{this.props.profile.user.screen_name}</h2>
+                    <p className="bio">{this.props.profile.user.bio}</p>
                     {markBtn}
                 </div>
             </div>
@@ -181,26 +190,26 @@ var Profile = React.createClass({
                 <ul className="short">
                     <li>
                         <span className={locationCls} aria-hidden="true"></span>
-                        {this.state.user.location}
+                        {this.props.profile.user.location}
                     </li>
                     <li>
                         <span className={websiteCls} aria-hidden="true"></span>
-                        {this.state.user.website}
+                        {this.props.profile.user.website}
                     </li>
                 </ul>
 
                 <ul className="statistics">
                     <li>
                         <label>Tweets</label>
-                        {this.state.user.total_tweets}
+                        {this.props.profile.user.total_tweets}
                     </li>
                     <li>
                         <label>Following</label>
-                        {this.state.user.following}
+                        {this.props.profile.user.following}
                     </li>
                     <li>
                         <label>Followers</label>
-                        {this.state.user.followers}
+                        {this.props.profile.user.followers}
                     </li>
                 </ul>
             </div>
@@ -233,13 +242,15 @@ var Tracker = React.createClass({
                 this.setState({
                     activeUser: userResult[1],
                     loading: true,
-                    tweets: []
+                    tweets: [],
+                    playing: true
                 });
             } else if(tagResult) {
                 this.setState({
                     activeTag: tagResult[1],
                     loading: true,
-                    tweets: []
+                    tweets: [],
+                    playing: true
                 });
             }
         }
@@ -247,9 +258,15 @@ var Tracker = React.createClass({
         window.setInterval(this._tick, 250);
     },
 
-    componentDidUpdate: function() {
+    componentDidUpdate: function(prevProps, prevState) {
         window.localStorage['tags'] = JSON.stringify(this.state.tags);
         window.localStorage['users'] = JSON.stringify(this.state.users);
+
+        if(this.state.activeUser !== prevState.activeUser && this.state.activeUser) {
+            if(this.state.activeUserProfile === null || this.state.activeUserProfile.user.screen_name !== this.state.activeUser) {
+                this._fetchProfile(this.state.activeUser);
+            }
+        }
     },
 
     getInitialState: function() {
@@ -265,7 +282,8 @@ var Tracker = React.createClass({
             pendingUser: '',
             editingTag: false,
             editingUser: false,
-            playing: true
+            playing: true,
+            activeUserProfile: null
         };
     },
     
@@ -282,7 +300,9 @@ var Tracker = React.createClass({
             url: '/stream',
             data: {
                 tag: this.state.activeTag,
-                user: this.state.activeUser
+                user: this.state.activeUser,
+                time_start: (+(new Date))/1000,
+                time_end: (+(new Date))/1000 - TIME_WINDOW
             },
             success: this._updateStream.bind(this, {
                 user: this.state.activeUser, 
@@ -312,7 +332,7 @@ var Tracker = React.createClass({
         }
 
         this.setState({
-            tweets: result.tweets,
+            tweets: result.tweets.concat(this.state.tweets),
             loading: false
         });
     },
@@ -322,7 +342,8 @@ var Tracker = React.createClass({
             activeTag: null,
             activeUser: null,
             loading: true,
-            tweets: []
+            tweets: [],
+            playing: true
         });
 
         window.location.hash = "";
@@ -335,7 +356,8 @@ var Tracker = React.createClass({
             activeTag: hashtag,
             activeUser: null,
             loading: true,
-            tweets: []
+            tweets: [],
+            playing: true
         });
 
         window.location.hash = "hash"+hashtag;
@@ -346,7 +368,8 @@ var Tracker = React.createClass({
             activeTag: null,
             activeUser: screenname,
             loading: true,
-            tweets: []
+            tweets: [],
+            playing: true
         });
         var users = [screenname];
         for(var i = 0; i < this.state.users.length; i++) {
@@ -367,7 +390,8 @@ var Tracker = React.createClass({
             activeTag: hashtag,
             activeUser: null,
             loading: true,
-            tweets: []
+            tweets: [],
+            playing: true
         });
         var tags = [hashtag];
         for(var i = 0; i < this.state.tags.length; i++) {
@@ -390,10 +414,35 @@ var Tracker = React.createClass({
             activeTag: null,
             activeUser: user,
             loading: true,
-            tweets: []
+            tweets: [],
+            playing: true,
+            activeUserProfile: null
         });
 
         window.location.hash = "user"+user;
+    },
+
+    _fetchProfile: function(user) {
+        $.ajax({
+            url: '/profile',
+            method: 'GET',
+            data: {
+                screen_name: user
+            },
+            success: this.handleProfile,
+            error: function(e) {
+                window.setTimeout(this._fetchProfile.bind(this), 1000);
+            }.bind(this)
+        });
+    },
+
+    handleProfile: function(response) {
+        this.setState({
+            activeUserProfile: {
+                user: response.tuser,
+                marked: response.marked
+            }
+        });
     },
 
     handleUserRemoveClick: function(i, e) {
@@ -605,7 +654,7 @@ var Tracker = React.createClass({
         var profile_panel = '';
 
         if(this.state.activeUser !== null) {
-            profile_panel = <Profile key={this.state.activeUser} screen_name={this.state.activeUser} />;
+            profile_panel = <Profile profile={this.state.activeUserProfile} key={this.state.activeUser} screen_name={this.state.activeUser} />;
         }
 
         return <div>
