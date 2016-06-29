@@ -1,8 +1,10 @@
 var TIME_WINDOW = 30;
-var DESCEND_LIMIT = 1000;
+var DESCEND_LIMIT = 100;
 var EGG_URL = '/static/img/egg-blue.jpg';
 var TIMEOUT = 10 * 1000;
 var INTERVAL_REFRESH_GUESSES = 10 * 1000;
+var TICK_INTERVAL = 500;
+var MAX_LENGTH = 50;
 
 var GuessesPanel = React.createClass({
     getInitialState: function() {   
@@ -304,7 +306,7 @@ var Tracker = React.createClass({
             }
         }
 
-        window.setInterval(this._tick, 250);
+        window.setInterval(this._tick, TICK_INTERVAL);
     },
 
     componentDidUpdate: function(prevProps, prevState) {
@@ -341,13 +343,27 @@ var Tracker = React.createClass({
     },
     
     _descend: function(query) {
+        if(this.state.tweets.length > DESCEND_LIMIT) {
+            return;
+        }
+
         if(!this.compareQuery(query)) {
             return;
         }
 
+        if(this.state.activeUser && (!this.state.activeUserProfile || !this.state.activeUserProfile.user)) {
+            window.setInterval(this._descend.bind(this, query), 1000);
+            return;
+        }
+
+        var user;
+        if(this.state.activeUser) {
+            user = this.state.activeUserProfile.user.user_id;
+        }
+
         var data = {
             tag: this.state.activeTag,
-            user: Number(this.state.activeUserProfile.user.user_id),
+            user: user,
             max_id: this.state.maxId
         };
 
@@ -359,6 +375,10 @@ var Tracker = React.createClass({
             url: '/stream',
             data: data,
             success: function(response) {
+                if(!this.compareQuery(query)) {
+                    return;
+                }
+
                 if(response.tweets.length === 0) {
                     return;
                 }
@@ -423,7 +443,7 @@ var Tracker = React.createClass({
                 since_id: this.state.sinceId
             },
             success: this._updateStream.bind(this, this.getQuery()),
-            error: function() {
+            complete: function() {
                 this.setState({ 
                     ajaxXHR: null
                 });
@@ -441,14 +461,18 @@ var Tracker = React.createClass({
             return;
         }
 
+        if(this.state.loading) {
+            this.setState({
+                loading: false
+            });
+        }
+
         if(result.tweets.length === 0) {
             return;
         }
 
         this.setState({
-            tweets: result.tweets.concat(this.state.tweets),
-            ajaxXHR: null,
-            loading: false
+            tweets: result.tweets.concat(this.state.tweets).slice(0, MAX_LENGTH)
         });
 
         if(result.tweets.length > 0) {
@@ -460,9 +484,9 @@ var Tracker = React.createClass({
                 this.setState({
                     maxId: result.min_tweet_id
                 });
-            }
 
-            this._descend(query);
+                this._descend(query);
+            }
         }
     },
         
@@ -473,7 +497,9 @@ var Tracker = React.createClass({
             guessesActive: false,
             loading: true,
             tweets: [],
-            playing: true
+            playing: true,
+            sinceId: null,
+            maxId: null
         });
 
         window.location.hash = "";
@@ -488,7 +514,9 @@ var Tracker = React.createClass({
             guessesActive: false,
             loading: true,
             tweets: [],
-            playing: true
+            playing: true,
+            sinceId: null,
+            maxId: null
         });
 
         window.location.hash = "hash"+hashtag;
@@ -501,7 +529,9 @@ var Tracker = React.createClass({
             guessesActive: false,
             loading: true,
             tweets: [],
-            playing: true
+            playing: true,
+            sinceId: null,
+            maxId: null
         });
         var users = [screenname];
         for(var i = 0; i < this.state.users.length; i++) {
@@ -524,7 +554,9 @@ var Tracker = React.createClass({
             guessesActive: false,
             loading: true,
             tweets: [],
-            playing: true
+            playing: true,
+            sinceId: null,
+            maxId: null
         });
         var tags = [hashtag];
         for(var i = 0; i < this.state.tags.length; i++) {
@@ -550,7 +582,9 @@ var Tracker = React.createClass({
             loading: true,
             tweets: [],
             playing: true,
-            activeUserProfile: null
+            activeUserProfile: null,
+            sinceId: null,
+            maxId: null
         });
 
         window.location.hash = "user"+user;
@@ -595,7 +629,9 @@ var Tracker = React.createClass({
                 activeUser: null,
                 guessesActive: false,
                 loading: true,
-                tweets: []
+                tweets: [],
+                sinceId: null,
+                maxId: null
             });
         }
     },
@@ -615,7 +651,9 @@ var Tracker = React.createClass({
             this.setState({
                 activeTag: null,
                 loading: true,
-                tweets: []
+                tweets: [],
+                sinceId: null,
+                maxId: null
             });
         }
     },
@@ -711,7 +749,9 @@ var Tracker = React.createClass({
             activeUser: null,
             loading: true,
             playing: true,
-            activeUserProfile: null
+            activeUserProfile: null,
+            sinceId: null,
+            maxId: null
         });
     },
 

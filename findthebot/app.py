@@ -440,7 +440,7 @@ def tweet_stream(team_id):
 
     return jsonify(min_tweet_id=min_tweet_id, max_tweet_id=max_tweet_id, tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'user': tuser_schema.dump(tweet.tuser)[0]} for tweet in tweets])
 
-def tweet_stream_tag(virtual_time_upper, tag, since_id=None, max_id = None, limit=3):
+def tweet_stream_tag(virtual_time_upper, tag, since_id=None, max_id = None, limit=30):
     entities = TweetEntity.query.filter(TweetEntity.type == "hashtag").filter(TweetEntity.text == tag.lower())
 
     if since_id is None and max_id is None:
@@ -472,7 +472,7 @@ def tweet_stream_tag(virtual_time_upper, tag, since_id=None, max_id = None, limi
 
     return tweets
 
-def tweet_stream_users(virtual_time_upper, user, since_id = None, max_id = None, limit=2):
+def tweet_stream_users(virtual_time_upper, user, since_id = None, max_id = None, limit=30):
     tweets = Tweet.query.filter(Tweet.user_id == user)
     if since_id is not None:
         tweets = tweets.filter(Tweet.tweet_id > since_id)
@@ -497,7 +497,7 @@ def tweet_stream_users(virtual_time_upper, user, since_id = None, max_id = None,
 
     return tweets
 
-def tweet_stream_all(virtual_time_upper, since_id = None, max_id = None, limit=2):
+def tweet_stream_all(virtual_time_upper, since_id = None, max_id = None, limit=30):
     tweets = Tweet.query
     if since_id is not None:
         tweets = tweets.filter(Tweet.tweet_id > since_id)
