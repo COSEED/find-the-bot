@@ -1,7 +1,55 @@
 var TIME_WINDOW = 30;
 var DESCEND_LIMIT = 1000;
 var EGG_URL = '/static/img/egg-blue.jpg';
-var TIMEOUT = 10000;
+var TIMEOUT = 10 * 1000;
+var INTERVAL_REFRESH_GUESSES = 10 * 1000;
+
+var GuessesPanel = React.createClass({
+    getInitialState: function() {   
+        return {
+            guesses: [],
+            interval: null
+        };
+    },
+
+    componentDidMount: function() {
+        var iv = window.setInterval(this._tick, INTERVAL_REFRESH_GUESSES);
+        this.setState({
+            interval: iv
+        });
+    },
+
+    _tick: function() {
+        var ajaxXHR = $.ajax({
+            url: '/guesses',
+            success: this._handleGuesses.bind(this),
+            timeout: TIMEOUT
+        });
+    },
+
+    _handleGuesses: function(result, textStatus, jqXHR) {
+        this.setState({
+            guesses: result.guesses
+        });
+    },
+
+    componentWillUnmount: function() {
+        window.clearInterval(this.state.interval);
+    },
+
+    render: function() {
+        var guesses = [];
+
+        for(var i = 0; i < this.state.guesses.length; i++) {
+            guesses.push(<li><a onClick={this.props.handleUserClick.bind(this, this.state.guesses[i].screen_name)} href="#">@{this.state.guesses[i].screen_name}</a></li>);
+        }
+
+        return <div>
+            <h3>You have guessed:</h3>
+            <ul>{guesses}</ul>
+        </div>;
+    }
+});
 
 var Tweet = React.createClass({
     getInitialState: function() {
@@ -664,7 +712,7 @@ var Tracker = React.createClass({
             guesses_cls += " nav-active";
             guess_hide = "hide";
 
-            guess_panel = "test";
+            guess_panel = <GuessesPanel handleUserClick={this.handleClickedUsername} />;
         }
 
         var playpause_firehose = '';

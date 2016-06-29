@@ -388,11 +388,11 @@ def tweet_stream(team_id):
 
 def tweet_stream_tag(team_id, tag):
     tweets = tweet_stream_all(team_id)
-    return filter(lambda tweet: tweet.text.find("#"+tag) >= 0, tweets)
+    return filter(lambda tweet: tweet.text.lower().find("#"+tag.lower()) >= 0, tweets)
 
 def tweet_stream_users(team_id, user):
     tweets = tweet_stream_all(team_id)
-    return filter(lambda tweet: tweet.text.find("@"+user) >= 0, tweets)
+    return filter(lambda tweet: tweet.text.lower().find("@"+user.lower()) >= 0, tweets)
 
 def tweet_stream_all(team_id):
     MAGIC_TWEET_START_TIMESTAMP = 1419090805 # Twitter tweet ID 546332554069282817 occurred at this timestamp
@@ -462,7 +462,7 @@ def tracker_unguess(team_id):
 def tracker_guesses(team_id):
     guesses = GuessTuser.query.filter(GuessTuser.team_id == team_id).all()
 
-    return jsonify(users=[tuser_schema.dump(guess.tuser)[0] for guess in guesses])
+    return jsonify(guesses=[tuser_schema.dump(guess.tuser)[0] for guess in guesses])
 
 if __name__ == "__main__":
     app.run(debug=debug, host='0.0.0.0', port=int(os.getenv("PORT")))
