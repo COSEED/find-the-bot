@@ -8,8 +8,7 @@ var GuessesPanel = React.createClass({
     getInitialState: function() {   
         return {
             guesses: [],
-            interval: null,
-            loading: true
+            interval: null
         };
     },
 
@@ -30,8 +29,7 @@ var GuessesPanel = React.createClass({
 
     _handleGuesses: function(result, textStatus, jqXHR) {
         this.setState({
-            guesses: result.guesses,
-            loading: false
+            guesses: result.guesses
         });
     },
 
@@ -40,18 +38,14 @@ var GuessesPanel = React.createClass({
     },
 
     render: function() {
-        if(this.state.loading) {
-            return <div className="loading"></div>;
-        }
-
         var guesses = [];
 
         for(var i = 0; i < this.state.guesses.length; i++) {
-            guesses.push(<li><a onClick={this.props.handleUserClick.bind(this, this.state.guesses[i].screen_name)} href="#">@{this.state.guesses[i].screen_name}</a></li>);
+            guesses.push(<li><a onClick={this.handleUserClick.bind(this, this.state.guesses[i].screen_name)} href="#">@{this.state.guesses[i].screen_name}</a></li>);
         }
 
         return <div>
-            <h3>You have guessed:</h3>
+            <h1>You have guessed:</h1>
             <ul>{guesses}</ul>
         </div>;
     }
@@ -339,10 +333,46 @@ var Tracker = React.createClass({
             editingTag: false,
             editingUser: false,
             playing: true,
-            activeUserProfile: null
+            activeUserProfile: null,
+            loadingMore: false,
+            maxId: null,
+            sinceId: null
         };
     },
     
+    _descend: function() {
+        var data = {
+            tag: this.state.activeTag,
+            user: this.state.activeUser
+        };
+
+        this.setState({
+            loadingMore: true
+        });
+
+        if(this.state.maxId) {
+            data.maxId = this.state.maxId - 1;
+        }
+
+        var ajaxXHR = $.ajax({
+            url: '/stream',
+            data: data,
+            success: function(response) {
+                var tweets = this.state.tweets.concat(response.tweets);
+
+                this.setState({
+                    tweets: tweets
+                });
+            }.bind(this),
+            complete: function() {
+                this.setState({
+                    loadingMore: false
+                });
+            }.bind(this),
+            timeout: TIMEOUT
+        });
+    },
+
     _tick: function() {
         if(this.state.ajaxXHR !== null) {
             return;
@@ -356,7 +386,8 @@ var Tracker = React.createClass({
             url: '/stream',
             data: {
                 tag: this.state.activeTag,
-                user: this.state.activeUser
+                user: this.state.activeUser,
+                since_id: this.state.sinceId
             },
             success: this._updateStream.bind(this, {
                 user: this.state.activeUser, 
@@ -718,7 +749,7 @@ var Tracker = React.createClass({
             guesses_cls += " nav-active";
             guess_hide = "hide";
 
-            guess_panel = <GuessesPanel handleUserClick={this.handleClickedUsername} />;
+            guess_panel = <GuessesPanel />;
         }
 
         var playpause_firehose = '';
