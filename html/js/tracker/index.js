@@ -491,6 +491,10 @@ var Tracker = React.createClass({
     },
         
     handleFirehoseClick: function(e) {
+        if($(e.target).is('.glyphicon')) {
+            return;
+        }
+
         this.setState({
             activeTag: null,
             activeUser: null,
@@ -506,6 +510,10 @@ var Tracker = React.createClass({
     },
 
     handleTagClick: function(e) {
+        if($(e.target).is('.glyphicon')) {
+            return;
+        }
+
         var hashtag = $(e.target).closest('li').attr('data-tag');
 
         this.setState({
@@ -573,6 +581,10 @@ var Tracker = React.createClass({
     },
 
     handleUserClick: function(e) {
+        if($(e.target).is('.glyphicon')) {
+            return;
+        }
+
         var user = $(e.target).closest('li').attr('data-user');
 
         this.setState({
