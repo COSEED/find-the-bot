@@ -328,6 +328,7 @@ def test_makeguess(team_id, test_id):
         'lessons': [],
     }
 
+    '''
     for lesson in tuser.lessons:
         resp['lessons'].append({
             'pointer_id': lesson.pointer_id,
@@ -336,6 +337,7 @@ def test_makeguess(team_id, test_id):
             'message_title': lesson.message_title,
             'message_body': lesson.message_body,
         })
+    '''
 
     if resp['complete']:
         resp['next'] = "/test/%s/complete" % (test_id)
