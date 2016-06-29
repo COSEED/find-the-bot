@@ -145,7 +145,8 @@ class Tuser(db.Model):
 
     # I captured the small version, so strip out the _normal suffix
     def get_profile_url_fullsize(self):
-        return self.profile_image_url.replace("_normal", "")
+        #return self.profile_image_url.replace("_normal", "")
+        return self.profile_image_url
 
 class TuserSchema(Schema):
     id = fields.Int()
