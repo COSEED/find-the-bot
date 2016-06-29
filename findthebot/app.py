@@ -396,7 +396,6 @@ def tweet_stream(team_id):
 
     if (tag == "" or tag is None) and (user == "" or user is None):
         tweets = tweet_stream_all(team_id)
-        jsonify(tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'user': tuser_schema.dump(tweet.tuser)[0]} for tweet in tweets])
     elif (tag != "" and tag is not None):
         tweets = tweet_stream_tag(team_id, tag)
     elif (user != "" and user is not None):
@@ -404,20 +403,9 @@ def tweet_stream(team_id):
 
     return jsonify(tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'user': tuser_schema.dump(tweet.tuser)[0]} for tweet in tweets])
 
-def tweet_stream_tag(team_id, tag):
-    tweets = tweet_stream_all(team_id)
-    return filter(lambda tweet: tweet.text.lower().find("#"+tag.lower()) >= 0, tweets)
-
-def tweet_stream_users(team_id, user):
-    tweets = tweet_stream_all(team_id)
-    return filter(lambda tweet: tweet.text.lower().find("@"+user.lower()) >= 0, tweets)
-
-def tweet_stream_all(team_id):
+def tweet_stream_tag(team_id, tag, limit=100):
     MAGIC_TWEET_START_TIMESTAMP = 1419090805 # Twitter tweet ID 546332554069282817 occurred at this timestamp
     MAGIC_TWEET_END_TIMESTAMP = 1417434398 # Twitter tweet ID 546332554069282817 occurred at this timestamp
-
-    # Real number [0, +inf). 1 means each wall clock second = 1 virtual second. 0.1 means ten wall clock seconds to every virtual second (clock runs slow)
-    TIMESTAMP_FLOW_SPEED = 0.1
 
     # This parameter controls what real time corresponds to the start of the virtual time.
     # Reset this to the current unix epoch "reset the clock"
@@ -432,7 +420,73 @@ def tweet_stream_all(team_id):
     virtual_time_upper += MAGIC_TWEET_START_TIMESTAMP - WALL_TIME_ZERO
     virtual_time_lower = virtual_time_upper - TIME_WINDOW
 
-    bot_user_ids = [bot.twitter_id for bot in TeamBot.query.all()]
+    entities = TweetEntity.query.filter(TweetEntity.type == "hashtag").filter(TweetEntity.text == tag)
+    entities = entities.order_by(TweetEntity.tweet_id.desc()).limit(limit)
+    entities = entities.all()
+
+    if len(entities) > 0:
+        tweet_ids = tuple([entity.tweet_id for entity in entities])
+
+        tweets = Tweet.query.filter(Tweet.tweet_id.in_(tweet_ids)).filter(Tweet.timestamp <= virtual_time_upper).all()
+
+        tusers = {}
+        tusers_to_fetch = []
+
+        for tweet in tweets:
+            tuser = Tuser.query.filter(Tuser.user_id == tweet.user_id).first()
+            tweet.tuser = tuser
+
+        return tweets
+    else:
+        return []
+
+def tweet_stream_users(team_id, user):
+    MAGIC_TWEET_START_TIMESTAMP = 1419090805 # Twitter tweet ID 546332554069282817 occurred at this timestamp
+    MAGIC_TWEET_END_TIMESTAMP = 1417434398 # Twitter tweet ID 546332554069282817 occurred at this timestamp
+
+    # This parameter controls what real time corresponds to the start of the virtual time.
+    # Reset this to the current unix epoch "reset the clock"
+    # 1455161557 = 7:32pm PT, Wednesday February 10, 2016
+    WALL_TIME_ZERO = int(os.getenv('TIMESTAMP_ZERO'))
+
+    # Request the last TIME_WINDOW virtual seconds of tweets
+    TIME_WINDOW = 30
+
+    # Later: These two (upper, lower) will be user-provided
+    virtual_time_upper = time.time()
+    virtual_time_upper += MAGIC_TWEET_START_TIMESTAMP - WALL_TIME_ZERO
+    virtual_time_lower = virtual_time_upper - TIME_WINDOW
+
+    tweets = Tweet.query.filter(Tweet.timestamp < int(virtual_time_upper))
+    tweets = tweets.filter(Tweet.timestamp >= int(virtual_time_lower))
+    tweets = tweets.order_by(Tweet.timestamp.desc())
+    tweets = tweets.all()
+
+    tusers = {}
+    tusers_to_fetch = []
+
+    for tweet in tweets:
+        tuser = Tuser.query.filter(Tuser.user_id == tweet.user_id).first()
+        tweet.tuser = tuser
+
+    return tweets
+
+def tweet_stream_all(team_id):
+    MAGIC_TWEET_START_TIMESTAMP = 1419090805 # Twitter tweet ID 546332554069282817 occurred at this timestamp
+    MAGIC_TWEET_END_TIMESTAMP = 1417434398 # Twitter tweet ID 546332554069282817 occurred at this timestamp
+
+    # This parameter controls what real time corresponds to the start of the virtual time.
+    # Reset this to the current unix epoch "reset the clock"
+    # 1455161557 = 7:32pm PT, Wednesday February 10, 2016
+    WALL_TIME_ZERO = int(os.getenv('TIMESTAMP_ZERO'))
+
+    # Request the last TIME_WINDOW virtual seconds of tweets
+    TIME_WINDOW = 30
+
+    # Later: These two (upper, lower) will be user-provided
+    virtual_time_upper = time.time()
+    virtual_time_upper += MAGIC_TWEET_START_TIMESTAMP - WALL_TIME_ZERO
+    virtual_time_lower = virtual_time_upper - TIME_WINDOW
 
     tweets = Tweet.query.filter(Tweet.timestamp < int(virtual_time_upper))
     tweets = tweets.filter(Tweet.timestamp >= int(virtual_time_lower))
