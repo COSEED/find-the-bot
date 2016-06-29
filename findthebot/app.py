@@ -26,13 +26,28 @@ if os.getenv('DATABASE_URL') is None:
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_ECHO'] = debug
 
+def check_auth(username, password):
+    """This function is called to check if a username /
+    password combination is valid.
+    """
+    return password == os.getenv('PASSWORD')
+
 def authenticate():
     """Sends a 401 response that enables basic auth"""
     return Response(
     'You have to login with proper credentials', 401,
     {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
-def requires_auth(f):
+def requires_auth_shared(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
+def requires_auth_team(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth = request.authorization
@@ -279,12 +294,12 @@ def find_results(bots, test):
     return data
 
 @app.route('/')
-@requires_auth
+@requires_auth_shared
 def index(team_id):
     return render_template("index.html")
 
 @app.route('/test/new', methods=['POST'])
-@requires_auth
+@requires_auth_shared
 def test_new(team_id):
     test = Test()
     db.session.add(test)
@@ -301,7 +316,7 @@ def test_new(team_id):
     return redirect('/test/%d/0' % (test.id))
 
 @app.route('/test/<test_id>/complete')
-@requires_auth
+@requires_auth_shared
 def test_done(team_id, test_id):
     test = Test.query.filter(Test.id == test_id).first()
     bots = TeamBot.query.all()
@@ -312,7 +327,7 @@ def test_done(team_id, test_id):
     return render_template("test_results.html", results=results)
 
 @app.route('/test/<test_id>/guess', methods=['POST'])
-@requires_auth
+@requires_auth_shared
 def test_makeguess(team_id, test_id):
     user_id = request.form["tuser_id"]
     guess_is_bot = request.form["guess_is_bot"] == "1"
@@ -348,7 +363,7 @@ def test_makeguess(team_id, test_id):
     return jsonify(resp)
 
 @app.route('/test/<test_id>/<guess_id>')
-@requires_auth
+@requires_auth_shared
 def test_showguess(team_id, test_id, guess_id):
     test = Test.query.filter(Test.id == test_id).first()
 
@@ -363,7 +378,7 @@ def test_showguess(team_id, test_id, guess_id):
     return render_template("test_guess.html", guess_id=int(guess_id), test=test, tuser=tuser, tweets=tweets, is_bot=tuser_is_bot)
 
 @app.route('/profile')
-@requires_auth
+@requires_auth_team
 def tweet_stream_profile(team_id):
     screen_name = request.args.get('screen_name')
     tuser = Tuser.query.filter(Tuser.screen_name == screen_name).first()
@@ -372,7 +387,7 @@ def tweet_stream_profile(team_id):
 
 
 @app.route('/stream')
-@requires_auth
+@requires_auth_team
 def tweet_stream(team_id):
     tag = request.args.get('tag', None)
     user = request.args.get('user', None)
@@ -434,12 +449,12 @@ def tweet_stream_all(team_id):
     return tweets
 
 @app.route('/tracker')
-@requires_auth
+@requires_auth_team
 def tracker(team_id):
     return render_template("tracker.html")
 
 @app.route('/tracker/guess', methods=['POST'])
-@requires_auth
+@requires_auth_team
 def tracker_guess(team_id):
     
     tuser_id = int(request.form["tuser_id"])
@@ -450,7 +465,7 @@ def tracker_guess(team_id):
     return ""
 
 @app.route('/tracker/unguess', methods=['POST'])
-@requires_auth
+@requires_auth_team
 def tracker_unguess(team_id):
     
     tuser_id = int(request.form["tuser_id"])
@@ -461,7 +476,7 @@ def tracker_unguess(team_id):
 
 
 @app.route('/guesses')
-@requires_auth
+@requires_auth_team
 def tracker_guesses(team_id):
     guesses = GuessTuser.query.filter(GuessTuser.team_id == team_id).all()
 
