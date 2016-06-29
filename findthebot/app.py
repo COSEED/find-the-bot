@@ -223,7 +223,7 @@ class TweetEntity(db.Model):
     text = db.Column(db.Text)
 
     db.Index('tweetentity_by_tweet_id', tweet_id)
-    db.Index('tweetentity_by_type_text', type, text)
+    db.Index('tweetentity_by_type_text_tweet_id', type, text, tweet_id)
 
 class TweetEdge(db.Model):
     __tablename__ = "tuser_tuser"
