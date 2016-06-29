@@ -43,7 +43,7 @@ var GuessesPanel = React.createClass({
         var guesses = [];
 
         for(var i = 0; i < this.state.guesses.length; i++) {
-            guesses.push(<li><a onClick={this.handleUserClick.bind(this, this.state.guesses[i].screen_name)} href="#">@{this.state.guesses[i].screen_name}</a></li>);
+            guesses.push(<li><a onClick={this.props.handleUserClick.bind(this, this.state.guesses[i].screen_name)} href="#">@{this.state.guesses[i].screen_name}</a></li>);
         }
 
         return <div>
@@ -845,7 +845,7 @@ var Tracker = React.createClass({
             guesses_cls += " nav-active";
             guess_hide = "hide";
 
-            guess_panel = <GuessesPanel />;
+            guess_panel = <GuessesPanel handleUserClick={this.handleClickedUsername}/>;
         }
 
         var playpause_firehose = '';
