@@ -1,6 +1,7 @@
 var TIME_WINDOW = 30;
 var DESCEND_LIMIT = 1000;
 var EGG_URL = '/static/img/egg-blue.jpg';
+var TIMEOUT = 10000;
 
 var Tweet = React.createClass({
     getInitialState: function() {
@@ -300,9 +301,7 @@ var Tracker = React.createClass({
             url: '/stream',
             data: {
                 tag: this.state.activeTag,
-                user: this.state.activeUser,
-                time_start: (+(new Date))/1000,
-                time_end: (+(new Date))/1000 - TIME_WINDOW
+                user: this.state.activeUser
             },
             success: this._updateStream.bind(this, {
                 user: this.state.activeUser, 
@@ -313,7 +312,7 @@ var Tracker = React.createClass({
                     ajaxXHR: null
                 });
             }.bind(this),
-            timeout: 1000
+            timeout: TIMEOUT
         });
 
         this.setState({
@@ -332,7 +331,7 @@ var Tracker = React.createClass({
         }
 
         this.setState({
-            tweets: result.tweets.concat(this.state.tweets),
+            tweets: result.tweets,
             loading: false
         });
     },
@@ -431,7 +430,7 @@ var Tracker = React.createClass({
             },
             success: this.handleProfile,
             error: function(e) {
-                window.setTimeout(this._fetchProfile.bind(this), 1000);
+                window.setTimeout(this._fetchProfile.bind(this), TIMEOUT);
             }.bind(this)
         });
     },

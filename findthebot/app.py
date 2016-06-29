@@ -370,14 +370,30 @@ def tweet_stream_profile(team_id):
 @app.route('/stream')
 @requires_auth
 def tweet_stream(team_id):
-
-    FRACTION_BOT_TWEETS = 1
-    FRACTION_NOISE_TWEETS = 0.01
-
-    noise = bool(request.args.get('noise', '0'))
     tag = request.args.get('tag', None)
     user = request.args.get('user', None)
 
+    tweets = None
+
+    if (tag == "" or tag is None) and (user == "" or user is None):
+        tweets = tweet_stream_all(team_id)
+        jsonify(tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'user': tuser_schema.dump(tweet.tuser)[0]} for tweet in tweets])
+    elif (tag != "" and tag is not None):
+        tweets = tweet_stream_tag(team_id, tag)
+    elif (user != "" and user is not None):
+        tweets = tweet_stream_users(team_id, user)
+
+    return jsonify(tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'user': tuser_schema.dump(tweet.tuser)[0]} for tweet in tweets])
+
+def tweet_stream_tag(team_id, tag):
+    tweets = tweet_stream_all(team_id)
+    return filter(lambda tweet: tweet.text.find("#"+tag) >= 0, tweets)
+
+def tweet_stream_users(team_id, user):
+    tweets = tweet_stream_all(team_id)
+    return filter(lambda tweet: tweet.text.find("@"+user) >= 0, tweets)
+
+def tweet_stream_all(team_id):
     MAGIC_TWEET_START_TIMESTAMP = 1419090805 # Twitter tweet ID 546332554069282817 occurred at this timestamp
     MAGIC_TWEET_END_TIMESTAMP = 1417434398 # Twitter tweet ID 546332554069282817 occurred at this timestamp
 
@@ -399,22 +415,10 @@ def tweet_stream(team_id):
 
     bot_user_ids = [bot.twitter_id for bot in TeamBot.query.all()]
 
-    tweets = None
-    if noise:
-        tweets = Tweet.query.filter(~Tweet.user_id.in_(bot_user_ids))
-    else:
-        tweets = Tweet.query.filter(Tweet.user_id.in_(bot_user_ids))
-
-    tweets = tweets.filter(Tweet.timestamp < int(virtual_time_upper))
+    tweets = Tweet.query.filter(Tweet.timestamp < int(virtual_time_upper))
     tweets = tweets.filter(Tweet.timestamp >= int(virtual_time_lower))
     tweets = tweets.order_by(Tweet.timestamp.desc())
     tweets = tweets.all()
-
-    # todo: replace me with entity search
-    if tag is not None:
-        tweets = filter(lambda tweet: tweet.text.find("#"+tag) >= 0, tweets)
-    if user is not None:
-        tweets = filter(lambda tweet: tweet.text.find("@"+user) >= 0, tweets)
 
     tusers = {}
     tusers_to_fetch = []
@@ -423,7 +427,7 @@ def tweet_stream(team_id):
         tuser = Tuser.query.filter(Tuser.user_id == tweet.user_id).first()
         tweet.tuser = tuser
 
-    return jsonify(tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'user': tuser_schema.dump(tweet.tuser)[0]} for tweet in tweets])
+    return tweets
 
 @app.route('/tracker')
 @requires_auth
