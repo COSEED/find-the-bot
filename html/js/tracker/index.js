@@ -121,6 +121,7 @@ var Tweet = React.createClass({
             <p className="userinfo" onClick={handledClickTweeter}>
                 <span className="fullname">{this.props.user.full_name}</span>
                 <span className="screenname">@{this.props.user.screen_name}</span>
+                <span className="datetime" dangerouslySetInnerHTML={{__html: this.props.tweet.datetime}}></span>
             </p>
             {text}
         </div>;
@@ -336,6 +337,7 @@ var Tracker = React.createClass({
             editingUser: false,
             playing: true,
             activeUserProfile: null,
+            activeUser404: false,
             loadingMore: false,
             maxId: null,
             sinceId: null
@@ -595,6 +597,7 @@ var Tracker = React.createClass({
             tweets: [],
             playing: true,
             activeUserProfile: null,
+            activeUser404: false,
             sinceId: null,
             maxId: null
         });
@@ -611,12 +614,19 @@ var Tracker = React.createClass({
             },
             success: this.handleProfile,
             error: function(e) {
+                if(e.status == 404) {
+                    this.setState({
+                        activeUser404: true
+                    });
+                    return;
+                }
+
                 window.setTimeout(this._fetchProfile.bind(this), TIMEOUT);
             }.bind(this)
         });
     },
 
-    handleProfile: function(response) {
+    handleProfile: function(response, textStatus, jqXHR) {
         this.setState({
             activeUserProfile: {
                 user: response.tuser,
@@ -762,6 +772,7 @@ var Tracker = React.createClass({
             loading: true,
             playing: true,
             activeUserProfile: null,
+            activeUser404: false,
             sinceId: null,
             maxId: null
         });
@@ -862,7 +873,12 @@ var Tracker = React.createClass({
         var profile_panel = '';
 
         if(this.state.activeUser !== null) {
-            profile_panel = <Profile profile={this.state.activeUserProfile} key={this.state.activeUser} screen_name={this.state.activeUser} />;
+            if(this.state.activeUser404 == true) {
+                profile_panel = "This user doesn't exist in the network.";
+                tweets = "";
+            } else {
+                profile_panel = <Profile profile={this.state.activeUserProfile} key={this.state.activeUser} screen_name={this.state.activeUser} />;
+            }
         }
 
         return <div>

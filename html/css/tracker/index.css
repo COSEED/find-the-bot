@@ -251,3 +251,8 @@
 #guesspanel {
     padding: 10px 30px;
 }
+
+.tweet .datetime {
+    color: #bbb;
+    margin-left: 16px;
+}

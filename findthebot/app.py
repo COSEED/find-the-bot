@@ -200,11 +200,15 @@ class Tweet(db.Model):
 
     def get_friendly_datetime(self):
         return time.strftime("%d %b %Y &middot; %I:%M %p", time.gmtime(self.timestamp))
+    
+    def get_friendly_datetime_noyear(self):
+        return time.strftime("%d %b &middot; %I:%M %p", time.gmtime(self.timestamp))
 
 class TweetSchema(Schema):
     id = fields.Int(load_from='id')
     tweet_id = fields.Str(load_from='tweet_id')
     text = fields.Str()
+    datetime = fields.Function(serialize=lambda u: Tweet.get_friendly_datetime_noyear(u))
 tweet_schema = TweetSchema()
 
 class TeamBot(db.Model):
@@ -387,6 +391,8 @@ def test_showguess(test_id, guess_id):
 def tweet_stream_profile(team_id):
     screen_name = request.args.get('screen_name')
     tuser = Tuser.query.filter(Tuser.screen_name == screen_name).first()
+    if tuser is None:
+        return Response(status=404)
     marked = GuessTuser.query.filter(GuessTuser.team_id == team_id, GuessTuser.tuser_id == tuser.id).count()
     return jsonify(tuser=tuser_schema.dump(tuser)[0], marked=bool(marked))
 
@@ -475,6 +481,8 @@ def tweet_stream_tag(virtual_time_upper, tag, since_id=None, max_id = None, limi
         tuser = Tuser.query.filter(Tuser.user_id == tweet.user_id).first()
         tweet.tuser = tuser
 
+    tweets = sorted(tweets, key=lambda u: u.timestamp)
+
     return tweets
 
 def tweet_stream_users(virtual_time_upper, user, since_id = None, max_id = None, limit=30):
@@ -485,7 +493,7 @@ def tweet_stream_users(virtual_time_upper, user, since_id = None, max_id = None,
         tweets = tweets.filter(Tweet.tweet_id <= max_id)
 
     if since_id is None and max_id is None:
-        tweets = tweets.filter(Tweet.timestamp < int(virtual_time_upper)).order_by(Tweet.timestamp.asc()).limit(limit)
+        tweets = tweets.filter(Tweet.timestamp < int(virtual_time_upper)).order_by(Tweet.timestamp.desc()).limit(limit)
     elif max_id is not None:
         tweets = tweets.order_by(Tweet.tweet_id.desc()).limit(limit)
     else:
