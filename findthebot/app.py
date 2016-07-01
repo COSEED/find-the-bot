@@ -375,6 +375,8 @@ def test_showguess(test_id, guess_id):
 
     tuser = tuser=test.selections[int(guess_id)].tuser
     tweets = tuser.tweets
+    if len(tweets) > 0:
+        tweets = tweets[:100]
 
     tuser_is_bot = len(TeamBot.query.filter(TeamBot.twitter_id == tuser.user_id).all()) > 0
 
