@@ -48,7 +48,7 @@ def requires_auth_shared(f):
         return f(*args, **kwargs)
     return decorated
 
-passwords = [str(f) for f in os.getenv('PASSWORDS').split(",")]
+passwords = os.getenv('PASSWORDS').split(",")
 
 def requires_auth_team(f):
     @wraps(f)
@@ -58,12 +58,11 @@ def requires_auth_team(f):
             return authenticate()
         try:
             team_id = passwords.index(str(auth.password)) + 1
-            kwargs['team_id'] = team_id
-            return f(*args, **kwargs)
         except ValueError:
-            raise
-            #print("Did not find %s in %s" % (auth.password, str(passwords)))
-            #return authenticate()
+            return authenticate()
+
+        kwargs['team_id'] = team_id
+        return f(*args, **kwargs)
     return decorated
 
 db = SQLAlchemy(app)
@@ -452,7 +451,7 @@ def tweet_stream(team_id):
     tweets = filter(lambda t: t.timestamp <= int(virtual_time_upper), tweets)
     for tw in tweets:
         if tw.userblob is None:
-            tw.userblob = ""
+            tw.userblob = "{}"
 
     if len(tweets): # fucking javascript
         min_tweet_id = str(min([tweet.tweet_id for tweet in tweets]))
