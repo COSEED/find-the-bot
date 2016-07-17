@@ -57,7 +57,7 @@ def requires_auth_team(f):
         if not auth:
             return authenticate()
         try:
-            team_id = passwords.index(auth.password) + 1
+            team_id = passwords.index(str(auth.password)) + 1
             kwargs['team_id'] = team_id
             return f(*args, **kwargs)
         except ValueError:
