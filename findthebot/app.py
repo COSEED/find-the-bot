@@ -448,6 +448,9 @@ def tweet_stream(team_id):
         tweets = tweet_stream_users(virtual_time_upper, user, since_id, max_id)
 
     tweets = filter(lambda t: t.timestamp <= int(virtual_time_upper), tweets)
+    for tw in tweets:
+        if tw.userblob is None:
+            tw.userblob = ""
 
     if len(tweets): # fucking javascript
         min_tweet_id = str(min([tweet.tweet_id for tweet in tweets]))
