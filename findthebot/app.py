@@ -48,7 +48,7 @@ def requires_auth_shared(f):
         return f(*args, **kwargs)
     return decorated
 
-passwords = [t for t in os.getenv('PASSWORDS').split(",")]
+passwords = os.getenv('PASSWORDS').split(",")
 
 def requires_auth_team(f):
     @wraps(f)
@@ -61,6 +61,7 @@ def requires_auth_team(f):
             kwargs['team_id'] = team_id
             return f(*args, **kwargs)
         except ValueError:
+            logging.info("Did not find %s" % (auth.password,))
             return authenticate()
     return decorated
 
