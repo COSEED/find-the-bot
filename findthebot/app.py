@@ -61,8 +61,9 @@ def requires_auth_team(f):
             kwargs['team_id'] = team_id
             return f(*args, **kwargs)
         except ValueError:
-            print("Did not find %s in %s" % (auth.password, str(passwords)))
-            return authenticate()
+            raise
+            #print("Did not find %s in %s" % (auth.password, str(passwords)))
+            #return authenticate()
     return decorated
 
 db = SQLAlchemy(app)
