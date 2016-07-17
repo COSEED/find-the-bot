@@ -47,17 +47,20 @@ def requires_auth_shared(f):
         return f(*args, **kwargs)
     return decorated
 
+passwords = [int(t) for t in os.getenv('PASSWORDS').split(",")]
+
 def requires_auth_team(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth = request.authorization
         if not auth:
             return authenticate()
-        team = Team.query.filter(Team.password == auth.password).first()
-        if not team:
+        try:
+            team_id = passwords.index(auth.password) + 1
+            kwargs['team_id'] = team.id
+            return f(*args, **kwargs)
+        except ValueError:
             return authenticate()
-        kwargs['team_id'] = team.id
-        return f(*args, **kwargs)
     return decorated
 
 db = SQLAlchemy(app)
