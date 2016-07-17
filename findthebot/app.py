@@ -61,7 +61,7 @@ def requires_auth_team(f):
             kwargs['team_id'] = team_id
             return f(*args, **kwargs)
         except ValueError:
-            logging.info("Did not find %s" % (auth.password,))
+            print("Did not find %s in %s" % (auth.password, str(passwords)))
             return authenticate()
     return decorated
 
