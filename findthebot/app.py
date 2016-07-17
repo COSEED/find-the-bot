@@ -192,6 +192,7 @@ class Tweet(db.Model):
     text = db.Column(db.Text)
     timestamp = db.Column(db.Integer)
     interesting = db.Column(db.Boolean)
+    user = db.Column(db.LargeBinary)
 
     db.Index('tweet_by_tweet_id_uniq', tweet_id, unique=True)
     db.Index('tweet_by_user_id_by_time', user_id, timestamp)
