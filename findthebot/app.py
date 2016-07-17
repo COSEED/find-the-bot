@@ -48,7 +48,7 @@ def requires_auth_shared(f):
         return f(*args, **kwargs)
     return decorated
 
-passwords = os.getenv('PASSWORDS').split(",")
+passwords = [str(f) for f in os.getenv('PASSWORDS').split(",")]
 
 def requires_auth_team(f):
     @wraps(f)
