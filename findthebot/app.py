@@ -1,5 +1,6 @@
 import os
 import time
+import json
 
 import logging
 import re
@@ -193,6 +194,7 @@ class Tweet(db.Model):
     timestamp = db.Column(db.Integer)
     interesting = db.Column(db.Boolean)
     user = db.Column(db.LargeBinary)
+    userblob = db.Column(db.Text)
 
     db.Index('tweet_by_tweet_id_uniq', tweet_id, unique=True)
     db.Index('tweet_by_user_id_by_time', user_id, timestamp)
@@ -453,7 +455,7 @@ def tweet_stream(team_id):
     else:
         min_tweet_id = max_tweet_id = None
 
-    return jsonify(min_tweet_id=min_tweet_id, max_tweet_id=max_tweet_id, tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'user': tuser_schema.dump(tweet.tuser)[0]} for tweet in tweets])
+    return jsonify(min_tweet_id=min_tweet_id, max_tweet_id=max_tweet_id, tweets=[{'tweet': tweet_schema.dump(tweet)[0], 'user': json.loads(tweet.userblob)} for tweet in tweets])
 
 def tweet_stream_tag(virtual_time_upper, tag, since_id=None, max_id = None, limit=30):
     entities = TweetEntity.query.filter(TweetEntity.type == "hashtag").filter(TweetEntity.text == tag.lower())
@@ -481,10 +483,6 @@ def tweet_stream_tag(virtual_time_upper, tag, since_id=None, max_id = None, limi
     tusers = {}
     tusers_to_fetch = []
 
-    for tweet in tweets:
-        tuser = Tuser.query.filter(Tuser.user_id == tweet.user_id).first()
-        tweet.tuser = tuser
-
     tweets = sorted(tweets, key=lambda u: u.timestamp)
 
     return tweets
@@ -508,10 +506,6 @@ def tweet_stream_users(virtual_time_upper, user, since_id = None, max_id = None,
     tusers = {}
     tusers_to_fetch = []
 
-    for tweet in tweets:
-        tuser = Tuser.query.filter(Tuser.user_id == tweet.user_id).first()
-        tweet.tuser = tuser
-
     return tweets
 
 def tweet_stream_all(virtual_time_upper, since_id = None, max_id = None, limit=30):
@@ -531,10 +525,6 @@ def tweet_stream_all(virtual_time_upper, since_id = None, max_id = None, limit=3
 
     tusers = {}
     tusers_to_fetch = []
-
-    for tweet in tweets:
-        tuser = Tuser.query.filter(Tuser.user_id == tweet.user_id).first()
-        tweet.tuser = tuser
 
     return tweets
 
