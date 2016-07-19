@@ -103,6 +103,16 @@ var Tweet = React.createClass({
         });
     },
 
+    _dangerous: function(texts) {
+        for(var i = 0; i < texts.length; i++) {
+            if(typeof texts[i] === 'string') {
+                texts[i] = <p dangerouslySetInnerHTML={{__html: texts[i]}}></p>;
+            }
+        }
+
+        return texts;
+    },
+
     render: function() {
         var hashtagRegex = /#(\w+)/g,
             mentionRegex = /@(\w+)/g;
@@ -111,6 +121,7 @@ var Tweet = React.createClass({
 
         text = this._match(text, hashtagRegex, this.props.handleClickedHashtagEvent);
         text = this._match(text, mentionRegex, this.props.handleClickedUsernameEvent);
+        var dangerousText = this._dangerous(text);
 
         var handledClickTweeter = this._trigger.bind(this, this.props.handleClickedUsernameEvent, this.props.user.screen_name);
 
@@ -123,7 +134,7 @@ var Tweet = React.createClass({
                 <span className="screenname">@{this.props.user.screen_name}</span>
                 <span className="datetime" dangerouslySetInnerHTML={{__html: this.props.tweet.datetime}}></span>
             </p>
-            {text}
+            {dangerousText}
         </div>;
     }
 });
