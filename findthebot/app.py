@@ -158,7 +158,7 @@ class Tuser(db.Model):
     db.Index('tuser_by_id_timestamp', user_id, timestamp)
     db.Index('tuser_by_screen_name', screen_name)
 
-    tweets = db.relationship('Tweet', primaryjoin="and_(foreign(Tweet.user_id)==Tuser.user_id)", order_by="desc(Tweet.timestamp)")
+    tweets = db.relationship('Tweet', primaryjoin="and_(foreign(Tweet.user_id)==Tuser.user_id)", order_by="desc(Tweet.timestamp)", lazy='dynamic')
     lessons = db.relationship('TuserLesson', lazy='joined')
 
     def __repr__(self):
@@ -385,9 +385,9 @@ def test_showguess(test_id, guess_id):
         return redirect('/test/%s/complete' % (test_id))
 
     tuser = tuser=test.selections[int(guess_id)].tuser
-    tweets = tuser.tweets
-    if len(tweets) > 0:
-        tweets = tweets[:100]
+    tweets = tuser.tweets.limit(100)
+    #if len(tweets) > 0:
+        #tweets = tweets[:100]
 
     tuser_is_bot = len(TeamBot.query.filter(TeamBot.twitter_id == tuser.user_id).all()) > 0
 
