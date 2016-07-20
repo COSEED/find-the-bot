@@ -397,7 +397,7 @@ def test_showguess(test_id, guess_id):
 @requires_auth_team
 def tweet_stream_profile(team_id):
     screen_name = request.args.get('screen_name')
-    tuser = Tuser.query.filter(Tuser.screen_name == screen_name).first()
+    tuser = Tuser.query.filter(Tuser.screen_name == screen_name).order_by(Tuser.id.desc()).first()
     if tuser is None:
         return Response(status=404)
     marked = GuessTuser.query.filter(GuessTuser.team_id == team_id, GuessTuser.tuser_id == tuser.id).count()
