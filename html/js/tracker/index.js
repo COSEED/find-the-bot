@@ -794,7 +794,11 @@ var Tracker = React.createClass({
 
         for(var i = 0; i < this.state.tweets.length; i++) {
             var tweetdata = this.state.tweets[i];
-            tweets.push(<Tweet handleClickedHashtagEvent={this.handleClickedHashtag} handleClickedUsernameEvent={this.handleClickedUsername} key={tweetdata.tweet.id} user={tweetdata.user} tweet={tweetdata.tweet} />);
+            var profile = tweetdata.user;
+            if(this.state.activeUser !== null) {
+                profile = this.state.activeUserProfile;
+            }
+            tweets.push(<Tweet handleClickedHashtagEvent={this.handleClickedHashtag} handleClickedUsernameEvent={this.handleClickedUsername} key={tweetdata.tweet.id} user={profile} tweet={tweetdata.tweet} />);
         }
 
         if(tweets.length == 0 && this.state.loading) {
