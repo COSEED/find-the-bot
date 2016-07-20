@@ -423,8 +423,8 @@ def tweet_stream(team_id):
     #MAGIC_TWEET_START_TIMESTAMP = 1419090805 # Twitter tweet ID 546332554069282817 occurred at this timestamp
     #MAGIC_TWEET_END_TIMESTAMP = 1417434398 # Twitter tweet ID 546332554069282817 occurred at this timestamp
 
-    MAGIC_TWEET_START_TIMESTAMP = 1419090684 # Twitter tweet ID 546332554069282817 occurred at this timestamp
-    MAGIC_TWEET_END_TIMESTAMP = 1419133884 # Twitter tweet ID 546332554069282817 occurred at this timestamp
+    MAGIC_TWEET_START_TIMESTAMP = 1419102000 # Twitter tweet ID 546332554069282817 occurred at this timestamp
+    MAGIC_TWEET_END_TIMESTAMP = 1419105600 # Twitter tweet ID 546332554069282817 occurred at this timestamp
 
     # This parameter controls what real time corresponds to the start of the virtual time.
     # Reset this to the current unix epoch "reset the clock"
